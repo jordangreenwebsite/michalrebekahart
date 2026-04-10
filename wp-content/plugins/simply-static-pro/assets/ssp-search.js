@@ -2,7 +2,6 @@
 
 const searchResults = [];
 
-
 // Helper: render excerpt conditionally based on localized flag and presence
 function renderExcerpt(item) {
     try {
@@ -13,11 +12,19 @@ function renderExcerpt(item) {
     return '';
 }
 
+/**
+ * Initialize Fuse.js search functionality.
+ * This function is called when DOM is ready to ensure all meta tags are available.
+ */
+function initFuseSearch() {
+    // Get index from JSON file - now safely inside DOM-ready
+    let fuse_config_element = document.querySelector("meta[name='ssp-config-path']");
 
-// Get index from JSON file.
-let fuse_config_element = document.querySelector("meta[name='ssp-config-path']");
+    if (null === fuse_config_element) {
+        console.log('No Fuse.js config found.');
+        return;
+    }
 
-if (null !== fuse_config_element) {
     let config_path = fuse_config_element.getAttribute("content");
     let version_element = document.querySelector("meta[name='ssp-config-version']");
     let version_suffix = '';
@@ -91,6 +98,10 @@ if (null !== fuse_config_element) {
 
     }
 
+    // Track loading state to handle race condition between loadIndex and loadConfig
+    let indexLoaded = false;
+    let configLoaded = false;
+
     loadIndex(function (response) {
         let json = JSON.parse(response);
         const index = Object.values(json);
@@ -106,7 +117,10 @@ if (null !== fuse_config_element) {
             };
 
             if (is_multilingual) {
-                if (result.language === language) {
+                // Include entry if:
+                // 1. Entry has no language set (empty/undefined) - assume it's for all languages
+                // 2. Entry's language matches the current document language
+                if (!result.language || result.language === language) {
                     searchResults.push(result);
                 }
             } else {
@@ -114,28 +128,76 @@ if (null !== fuse_config_element) {
             }
         }
 
+        indexLoaded = true;
+
+        // If fuse is already initialized (config loaded first), update its collection
         if (null !== fuse) {
             fuse.setCollection(searchResults);
         }
+        
+        // Notify that index data is now available
+        try {
+            window.dispatchEvent(new CustomEvent('ssp:index-ready'));
+        } catch (_) {}
     });
 
 // Search.
 
-    let keys = ['title', 'content', 'excerpt', 'language'];
     let fuse = null;
+
+    // Default max results; updated once config loads
+    let maxResults = 7;
 
     loadConfig(function (response) {
         config = JSON.parse(response);
 
+        // Read configurable max results (fallback to 7)
+        if (config.maxResults && parseInt(config.maxResults, 10) > 0) {
+            maxResults = parseInt(config.maxResults, 10);
+        }
+
+        // Build weighted keys dynamically from config (supports custom fields added via ssp_fuse_search_weights filter)
+        var weights = config.weights || {};
+        var keys = [];
+        for (var field in weights) {
+            if (weights.hasOwnProperty(field)) {
+                keys.push({ name: field, weight: parseFloat(weights[field]) || 1 });
+            }
+        }
+        // Ensure default keys exist if not provided
+        if (!weights.title) keys.push({ name: 'title', weight: 1 });
+        if (!weights.content) keys.push({ name: 'content', weight: 1 });
+        if (!weights.excerpt) keys.push({ name: 'excerpt', weight: 1 });
+        keys.push({ name: 'language', weight: 1 });
+
+        var fuseOptions = {
+            keys: keys,
+            shouldSort: true,
+            threshold: config.threshold ? config.threshold : 0.1,
+            maxPatternLength: 50
+        };
+
+        // Add extended search if enabled
+        if (config.useExtendedSearch) {
+            fuseOptions.useExtendedSearch = true;
+        }
+
+        // Add ignore location if enabled
+        if (config.ignoreLocation) {
+            fuseOptions.ignoreLocation = true;
+        }
+
         fuse = new Fuse(
             searchResults,
-            {
-                keys: keys,
-                shouldSort: true,
-                threshold: config.threshold ? config.threshold : 0.1,
-                maxPatternLength: 50
-            }
+            fuseOptions
         );
+
+        configLoaded = true;
+
+        // If index already loaded (index loaded first), ensure fuse has the data
+        if (indexLoaded && searchResults.length > 0) {
+            fuse.setCollection(searchResults);
+        }
 
         // Notify page helpers that Fuse is ready
         try {
@@ -168,13 +230,36 @@ if (null !== fuse_config_element) {
                 event.preventDefault()
             }
 
-
             input = searchInputNode.value.trim()
             selected = -1
 
+            // If static results page is enabled, redirect to the static search results page (/__qs/)
+            // But only if we're NOT already on the static search page
+            if (input.length >= 1 && window.ssp_search && ssp_search.use_static_results_page && ssp_search.static_search_path) {
+                // Check if we're already on the static search page to avoid redirect loop
+                var staticPath = ssp_search.static_search_path;
+                var basePath = staticPath.replace(/index\.html$/, '');
+                if (basePath.charAt(basePath.length - 1) !== '/') {
+                    basePath += '/';
+                }
+                // Normalize current path for comparison
+                var currentPath = window.location.pathname;
+                if (currentPath.length > 1 && currentPath.charAt(currentPath.length - 1) !== '/') {
+                    currentPath += '/';
+                }
+                // Only redirect if we're NOT already on the search page
+                var isOnSearchPage = currentPath === basePath || currentPath === staticPath || currentPath.endsWith('/__qs/') || currentPath.endsWith('/__qs/index.html');
+                if (!isOnSearchPage) {
+                    var searchUrl = window.location.origin + basePath + '?s=' + encodeURIComponent(input);
+                    window.location.href = searchUrl;
+                    return;
+                }
+                // If already on search page, fall through to render results inline
+            }
+
             // Always compute results on submit so the results list can render
             if (input.length >= 3 && fuse) {
-                results = fuse.search(input).slice(0, 7)
+                results = fuse.search(input).slice(0, maxResults)
             }
 
             // Ensure autocomplete dropdown is (re)shown on submit
@@ -239,7 +324,7 @@ if (null !== fuse_config_element) {
 
             if (input.length >= 3) {
                 if (fuse) {
-                    results = fuse.search(input).slice(0, 7)
+                    results = fuse.search(input).slice(0, maxResults)
                 } else {
                     // Fuse not ready yet; wait for it to load
                     results = []
@@ -314,43 +399,57 @@ if (null !== fuse_config_element) {
 
 
     function maybeBuildSearch() {
-        if (!config) {
-            return;
+        let builtAny = false;
+
+        // Use config.selector from fuse-config.json, or fall back to ssp_search.custom_selector from localized JS
+        let selectorSource = (config && config.selector) ? config.selector : null;
+        if (!selectorSource && window.ssp_search && ssp_search.custom_selector) {
+            selectorSource = ssp_search.custom_selector;
         }
 
-        if (!config.selector) {
-            return;
-        }
+        if (selectorSource) {
+            const selectors = selectorSource.split(',').map(function (string) {
+                return string.trim()
+            }).filter(Boolean);
 
-        const selectors = config.selector.split(',').map(function (string) {
-            return string.trim()
-        }).filter(Boolean);
+            for (let s = 0; s < selectors.length; s++) {
+                let selector = selectors[s];
 
-        for (let s = 0; s < selectors.length; s++) {
-            let selector = selectors[s];
-
-            if (!document.querySelectorAll(selector).length) {
-                continue;
-            }
-
-            let allSelectors = document.querySelectorAll(selector);
-
-            for (let i = 0; i < allSelectors.length; i++) {
-                let node = allSelectors[i];
-                // Normalize to the nearest form so both Fuse and Algolia behave the same
-                let form = null;
-                if (node.tagName && node.tagName.toLowerCase() === 'form') {
-                    form = node;
-                } else if (node.closest) {
-                    form = node.closest('form');
-                }
-                if (!form) {
+                if (!document.querySelectorAll(selector).length) {
                     continue;
                 }
-                // Avoid double replacement
-                try { if (form.dataset && form.dataset.sspReplaced === '1') continue; } catch(_) {}
-                buildSearch(form);
+
+                let allSelectors = document.querySelectorAll(selector);
+
+                for (let i = 0; i < allSelectors.length; i++) {
+                    let node = allSelectors[i];
+                    // Normalize to the nearest form so both Fuse and Algolia behave the same
+                    let form = null;
+                    if (node.tagName && node.tagName.toLowerCase() === 'form') {
+                        form = node;
+                    } else if (node.closest) {
+                        form = node.closest('form');
+                    }
+                    if (!form) {
+                        continue;
+                    }
+                    // Avoid double replacement
+                    try { if (form.dataset && form.dataset.sspReplaced === '1') continue; } catch(_) {}
+                    buildSearch(form);
+                    builtAny = true;
+                }
             }
+        }
+
+        // Fallback: if no custom selector elements were found/built,
+        // initialize any existing .ssp-search elements (e.g., from shortcode)
+        if (!builtAny) {
+            var existingForms = document.querySelectorAll('.ssp-search');
+            existingForms.forEach(function(node) {
+                // Skip if already initialized
+                try { if (node.dataset && node.dataset.sspFuseInit === '1') return; } catch(_) {}
+                new FuseSearchForm(node);
+            });
         }
     }
 
@@ -395,30 +494,26 @@ if (null !== fuse_config_element) {
         }
     }
 
-    // Initialize core search behaviors when DOM is ready and when Fuse is ready
-    (function () {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () {
-                try {
-                    initSearch();
-                } catch (_) {
-                }
-            });
-        } else {
-            try {
-                initSearch();
-            } catch (_) {
-            }
-        }
-        window.addEventListener('ssp:fuse-ready', function () {
-            try {
-                initSearch();
-            } catch (_) {
-            }
-        });
-    })();
+    // Initialize search when called (DOM is already ready at this point)
+    initSearch();
 
-    window.addEventListener('click', handleWindowClick)
-} else {
-    console.log('No Fuse.js config found.')
+    // Also re-initialize when Fuse config is loaded
+    window.addEventListener('ssp:fuse-ready', function () {
+        try {
+            initSearch();
+        } catch (_) {
+        }
+    });
+
+    window.addEventListener('click', handleWindowClick);
 }
+
+// Execute when DOM is ready - this ensures meta tags are available regardless of script position
+(function() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFuseSearch);
+    } else {
+        // DOM is already ready
+        initFuseSearch();
+    }
+})();

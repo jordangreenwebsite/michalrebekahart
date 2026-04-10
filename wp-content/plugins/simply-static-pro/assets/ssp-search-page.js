@@ -54,20 +54,38 @@ function sspGetLocalePrefixConsideringBase(pathname) {
 function sspReplaceTestTokens(term, scopeEl) {
   try {
     if (!term) return;
-    const scope = scopeEl || document.querySelector('main, #primary, .site-main, .content-area, .entry-content, .wp-block-post-content') || document.body;
-    const selectors = ['h1','h2','h3','.page-title','.entry-title','.archive-title','.search-title'];
-    const regex = /\btest\b/g; // exact word 'test'
-    selectors.forEach(function(sel){
-      const nodes = scope.querySelectorAll(sel);
-      nodes.forEach(function(n){
-        if (n.querySelector && n.querySelector('#ssp-term')) return;
-        n.childNodes.forEach(function(child){
-          if (child.nodeType === Node.TEXT_NODE && regex.test(child.textContent)) {
-            child.textContent = child.textContent.replace(regex, term);
-          }
+    const selectors = ['h1','h2','h3','.h1','.h2','.h3','.page-title','.entry-title','.archive-title','.search-title','.wp-block-query-title'];
+    
+    // Helper function to replace text in nodes
+    function replaceInScope(scope) {
+      let replaced = false;
+      selectors.forEach(function(sel){
+        const nodes = scope.querySelectorAll(sel);
+        nodes.forEach(function(n){
+          if (n.querySelector && n.querySelector('#ssp-term')) return;
+          n.childNodes.forEach(function(child){
+            if (child.nodeType === Node.TEXT_NODE) {
+              // Use a fresh regex for each replacement to avoid lastIndex issues
+              const newText = child.textContent.replace(/\btest\b/gi, term);
+              if (newText !== child.textContent) {
+                child.textContent = newText;
+                replaced = true;
+              }
+            }
+          });
         });
       });
-    });
+      return replaced;
+    }
+    
+    // Try the provided scope or common content containers first
+    const primaryScope = scopeEl || document.querySelector('main, #primary, .site-main, .content-area, .entry-content, .wp-block-post-content');
+    if (primaryScope && replaceInScope(primaryScope)) {
+      return; // Found and replaced in primary scope
+    }
+    
+    // Fallback: search the entire document body (headings might be outside main content area)
+    replaceInScope(document.body);
   } catch(_) {}
 }
 
@@ -125,8 +143,28 @@ function sspEnsureHeadingPlaceholder(beforeEl) {
 // Inject our search UI container into the detected target and initialize it
 function sspInjectIntoSearchPage() {
   // If the page already has any ssp-search form, do not inject another one
-  if (document.querySelector('.ssp-search')) return;
-  if (document.querySelector('.ssp-search-container-injected')) return;
+  // But still run auto-populate and heading term logic
+  var existingSearch = document.querySelector('.ssp-search');
+  if (existingSearch || document.querySelector('.ssp-search-container-injected')) {
+    // Still update heading and auto-populate for existing forms
+    sspSetHeadingTerm();
+    try {
+      let term = sspGetQueryParam('s');
+      if (term) {
+        try { term = decodeURIComponent(term); } catch(_) {}
+        term = (term + '').trim();
+        // Populate ALL search inputs on the page, not just the first one
+        const allInputs = document.querySelectorAll('.ssp-search .search-input');
+        allInputs.forEach(function(inputEl) {
+          if (inputEl) {
+            inputEl.value = term;
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+      }
+    } catch(_) {}
+    return;
+  }
 
   function firstMatch(selectors) {
     if (!selectors || !selectors.length) return null;
@@ -195,11 +233,17 @@ function sspInjectIntoSearchPage() {
     }
   } catch(_) {}
 
-  // Initialize Fuse form behaviors from ssp-search.js on the actual page form node
+  // Initialize search form behaviors on the actual page form node
+  // Use AlgoliaSearchForm when search_type is 'algolia', otherwise use FuseSearchForm
   try {
     const pageFormNode = wrapper.querySelector('.ssp-search');
     if (pageFormNode) {
-      new FuseSearchForm(pageFormNode);
+      const searchType = (window.ssp_search && ssp_search.search_type) ? ssp_search.search_type : 'fuse';
+      if (searchType === 'algolia' && typeof window.AlgoliaSearchForm === 'function') {
+        new AlgoliaSearchForm(pageFormNode);
+      } else if (typeof FuseSearchForm === 'function') {
+        new FuseSearchForm(pageFormNode);
+      }
     }
   } catch(_) {}
 
@@ -227,8 +271,23 @@ function sspIsOnStaticSearchPage() {
     const base = sspGetExportBase();
     const localePrefix = sspGetLocalePrefixConsideringBase(window.location.pathname);
     const expectedPath = (base.replace(/\/$/, '/') + (localePrefix === '/' ? '' : localePrefix.replace(/^\//, '')) + staticPath.replace(/^\//, ''));
+    
     function norm(p){ if(!p) return '/'; if(p.charAt(0) !== '/') p = '/' + p; p = p.replace(/\/+/g,'/'); if(p.length>1 && p.endsWith('/')) p = p.slice(0,-1); return p; }
-    return norm(window.location.pathname) === norm(expectedPath);
+    
+    // Check if paths are equivalent (handle /__qs/ vs /__qs/index.html)
+    function pathsEquivalent(currentPath, expected) {
+      const cur = norm(currentPath);
+      const exp = norm(expected);
+      if (cur === exp) return true;
+      // If expected ends with /index.html, also match the directory path
+      if (exp.endsWith('/index.html')) {
+        const expDir = exp.slice(0, -('/index.html'.length));
+        if (cur === expDir) return true;
+      }
+      return false;
+    }
+    
+    return pathsEquivalent(window.location.pathname, expectedPath);
   } catch(_) { return false; }
 }
 
@@ -237,6 +296,9 @@ function sspMaybeRedirectForSearch() {
   try {
     const term = sspGetQueryParam('s');
     if (!term) return;
+
+    // If we're already on the static search page, don't redirect
+    if (sspIsOnStaticSearchPage()) return;
 
     // Static detection: prefer meta; fallback to export base being non-root
     let isStatic = !!document.querySelector("meta[name='ssp-config-path']");
@@ -346,7 +408,7 @@ function sspInitSearchPageIfNeeded() {
       }, 3000, 50);
     }
 
-    // Prefill the term into ALL search inputs immediately, then ensure autosuggest appears quickly
+    // Prefill the term into ALL search inputs with retry mechanism
     (function(){
       try {
         var term = sspGetQueryParam('s');
@@ -354,26 +416,60 @@ function sspInitSearchPageIfNeeded() {
         term = (term + '').trim();
         if (!term) return;
 
-        // Fill every search input on the page right away (no waits)
-        var allInputs = document.querySelectorAll('.ssp-search .search-input');
-        allInputs.forEach(function(inp){ try { inp.value = term; } catch(_) {} });
+        // Function to populate inputs and trigger autosuggest
+        function populateInputs() {
+          var allInputs = document.querySelectorAll('.ssp-search .search-input');
+          var populated = false;
+          allInputs.forEach(function(inp){
+            try {
+              inp.value = term;
+              inp.dispatchEvent(new Event('input', { bubbles: true }));
+              populated = true;
+            } catch(_) {}
+          });
+          return populated && allInputs.length > 0;
+        }
 
-        // Trigger input now for all, to render autosuggest as soon as any instance is ready
-        allInputs.forEach(function(inp){
-          try { inp.dispatchEvent(new Event('input', { bubbles: true })); } catch(_) {}
+        // Try immediately
+        populateInputs();
+
+        // Retry with increasing delays to handle timing issues
+        var retryDelays = [50, 100, 200, 500, 1000];
+        retryDelays.forEach(function(delay){
+          setTimeout(function(){
+            var inputs = document.querySelectorAll('.ssp-search .search-input');
+            inputs.forEach(function(inp){
+              try {
+                // Only set if empty or different
+                if (!inp.value || inp.value !== term) {
+                  inp.value = term;
+                  inp.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+              } catch(_) {}
+            });
+          }, delay);
         });
 
         // Also, after Fuse signals ready, trigger input again to ensure suggestions populate everywhere
-        window.addEventListener('ssp:fuse-ready', function(){
+        // Helper function to re-trigger inputs
+        function retriggerInputs() {
           var inputs = document.querySelectorAll('.ssp-search .search-input');
           inputs.forEach(function(inp){
             try {
+              // Ensure value is set
+              if (!inp.value || inp.value !== term) {
+                inp.value = term;
+              }
               if ((inp.value || '').trim().length >= 3) {
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
               }
             } catch(_) {}
           });
-        }, { once: true });
+        }
+        
+        window.addEventListener('ssp:fuse-ready', retriggerInputs, { once: true });
+        // Also listen for index-ready which fires after searchResults are populated
+        window.addEventListener('ssp:index-ready', retriggerInputs, { once: true });
       } catch(_){ }
     })();
   } catch(_) {}
@@ -416,15 +512,10 @@ function sspAttachSubmitRedirect(scopeEl) {
 }
 
 (function(){
-  // Early redirect as soon as possible
-  if (document.readyState === 'loading') {
-    try { sspMaybeRedirectForSearch(); } catch(_) {}
-  } else {
-    try { sspMaybeRedirectForSearch(); } catch(_) {}
-  }
-
   // Initialize static search page after DOM is ready and after Fuse is ready
   function initWhenReady() {
+    // Check for redirect AFTER DOM is ready so meta tags are available
+    try { sspMaybeRedirectForSearch(); } catch(_) {}
     // Attach submit redirect globally (for pages with existing shortcode/UI)
     try { sspAttachSubmitRedirect(); } catch(_) {}
     // Init search page behaviors
