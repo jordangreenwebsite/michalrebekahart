@@ -101,6 +101,7 @@ const extraCSS = `<style>
 .art-native-submit{cursor:pointer;width:fit-content;border:0;background:#7B9B9A;color:white;padding:14px 30px;font:600 15px Inter,sans-serif}
 .art-native-submit:hover{background:#547976}.art-native-submit:disabled{opacity:.65;cursor:wait}
 .art-honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.art-form-status{font-weight:600;min-height:1.5em}.art-form-status[data-sent=true]{color:#2f6a55}.art-form-small{font-size:13px;line-height:1.6}.art-description-link{text-align:center;margin:8px auto 20px;font:14px Inter,sans-serif}.art-description-link a{color:#406b69;text-decoration:underline;text-underline-offset:4px}
+@media (max-width:479px){.breakdance .bde-section-27-100 .bde-heading-27-216{width:min(330px,calc(100vw - 36px));max-width:100%;overflow-wrap:normal}}
 .rebekah-mail-form label{font-weight:600}
 .rebekah-mail-form input,.rebekah-mail-form textarea{width:100%;padding:13px;border:1px solid #a7b9b8;border-radius:4px;background:#fff;font:inherit}
 .rebekah-mail-form button{border:0;padding:15px 18px;background:#7B9B9A;color:#fff;cursor:pointer;font:600 16px Inter,sans-serif}
