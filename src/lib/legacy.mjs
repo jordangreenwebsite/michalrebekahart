@@ -147,6 +147,7 @@ export function legacyHtml(route) {
   ].join('\n');
   html = html.replace('</head>', headExtras + '</head>');
   html = html.replace('</head>', '<link rel="stylesheet" href="/site-nav.css"><script defer src="/site-nav.js"></script></head>');
+  html = html.replace('</head>', '<link rel="stylesheet" href="/art-experience.css"><script defer src="/art-experience.js"></script></head>');
   html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/i, renderSiteHeader(route));
   const studioSchema = {
     '@context':'https://schema.org', '@type':'ProfessionalService',
@@ -193,6 +194,20 @@ export function legacyHtml(route) {
     });
     html = html.replace(/(<h2\b[^>]*>\s*Family\s*<\/h2>)/i,
       '$1<p class="art-description-link"><a href="/artwork-guide/">Browse the paintings with descriptions</a></p>');
+  }
+  if (route === '/') {
+    // Preserve original painting image order and full-resolution links, then
+    // give each card an understated visible label and caption.
+    html = html.replace(/<a\b[^>]*class="[^"]*ee-gallery-item--image[^"]*"[^>]*>[\s\S]*?<\/a>/gi, full => {
+      const src = full.match(/<img\b[^>]*\bsrc=["']([^"']+)/i)?.[1] || '';
+      const art = artwork.find(item => src.split('/').pop().startsWith(item.id));
+      if (!art) return full;
+      const anchor = full.replace(/<a\b/, '<a data-mra-lightbox data-mra-title="' + escapeAttr(art.title) + '" data-mra-description="' + escapeAttr(art.caption) + '"');
+      return '<article class="mra-painting-card mra-reveal">' + anchor
+        + '<div class="mra-art-caption"><h3>' + escapeAttr(art.title)
+        + '</h3><p>' + escapeAttr(art.caption) + '</p></div></article>';
+    });
+    html = html.replace(/\bee-gallery--caption-none\b/g,'ee-gallery--caption-none mra-curated-gallery');
   }
   if (!/<h1\b/i.test(html)) {
     html = html.replace(/(<body\b[^>]*>)/i, '$1<h1 class="sr-only-art">Michal Rebekah Art</h1>');
