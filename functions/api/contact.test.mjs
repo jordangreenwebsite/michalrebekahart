@@ -2,9 +2,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { onRequestPost } from './contact.js';
-const makeForm = (entries) => new Request('https://www.michalrebekahart.co.uk/api/contact',{
+const makeForm = (entries) => new Request('https://www.michalrebekahart.com/api/contact',{
   method:'POST',
-  headers:{Origin:'https://www.michalrebekahart.co.uk','Content-Type':'application/x-www-form-urlencoded'},
+  headers:{Origin:'https://www.michalrebekahart.com','Content-Type':'application/x-www-form-urlencoded'},
   body:new URLSearchParams(entries).toString()
 });
 const good = {name:'A visitor',email:'visitor@example.com',message:'I am interested in one of the family paintings.'};
