@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test functions/api/contact.test.mjs",
-    "test:browser": "node tests/browser-qa.mjs"
+    "test:browser": "node tests/browser-qa.mjs",
+    "test:navigation": "node tests/navigation-qa.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0"
