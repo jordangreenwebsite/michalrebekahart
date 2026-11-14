@@ -44,7 +44,7 @@ export const safeAttr = input => String(input)
 export function legacyExploreNav(){
   const sections = navigationGroups.map(group =>
     '<section class="art-nav-group" aria-label="'+safeAttr(group.title)+'">'
-    + '<h2>'+safeAttr(group.title)+'</h2>'
+    + '<strong class="art-nav-heading">'+safeAttr(group.title)+'</strong>'
     + group.links.map(link => '<a href="'+safeAttr(link.href)+'">'+safeAttr(link.label)+'</a>').join('')
     + '</section>'
   ).join('');
