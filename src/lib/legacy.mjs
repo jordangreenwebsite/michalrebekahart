@@ -271,7 +271,7 @@ export function legacyHtml(route) {
     // give each card an understated visible label and caption.
     html = html.replace(/<a\b[^>]*class="[^"]*ee-gallery-item--image[^"]*"[^>]*>[\s\S]*?<\/a>/gi, full => {
       const src = full.match(/<img\b[^>]*\bsrc=["']([^"']+)/i)?.[1] || '';
-      const art = artwork.find(item => src.split('/').pop().startsWith(item.id));
+      const art = artwork.find(item => src.split('/').pop().includes(item.id));
       if (!art) return full;
       const anchor = full.replace(/<a\b/, '<a data-mra-lightbox data-mra-title="' + escapeAttr(art.title) + '" data-mra-description="' + escapeAttr(art.caption) + '"');
       return '<article class="mra-painting-card mra-reveal">' + anchor
