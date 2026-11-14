@@ -1,0 +1,53 @@
+---
+import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
+import { entries } from '../data/discovery.mjs';
+export function getStaticPaths() {
+  return entries.map(entry => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const nearby = entries.filter(x => x.slug !== entry.slug && x.type === entry.type).slice(0, 2);
+const related = entries.find(x => x.slug === entry.related);
+const relatedItems = related ? [related, ...nearby] : nearby;
+---
+<DiscoveryLayout title={entry.title} description={entry.description} image={entry.image} place={entry.place}>
+  <section class="art-wrap art-hero">
+    <div>
+      <p class="eyebrow">{entry.eyebrow}</p>
+      <h1>{entry.title.split('|')[0].trim()}</h1>
+      <p class="lead">{entry.lead}</p>
+      <div class="action-row">
+        <a class="art-button" href="/contact/">Discuss a painting</a>
+        <a class="soft-link" href="/">See the original artwork</a>
+      </div>
+    </div>
+    <figure class="hero-art">
+      <img src={entry.image} alt="Original painting from the Michal Rebekah Art portfolio" loading="eager" decoding="async" />
+    </figure>
+  </section>
+  <article class="art-copy">
+    <h2>{entry.heading}</h2>
+    {entry.paragraphs.map(p => <p>{p}</p>)}
+    <div class="question">
+      <h3>{entry.prompt}</h3>
+      <p>{entry.response}</p>
+    </div>
+  </article>
+  <div class="art-wrap">
+    <aside class="quiet-panel">
+      <h2>Every painting begins with a feeling.</h2>
+      <p>My work is based in Cirencester in the Cotswolds. If you would like to ask about an original piece or a possible personalised painting, I would love to hear the story behind your idea. Commissions are occasional and depend on availability.</p>
+      <a href="/commissions/">Read about personalised artwork and children’s books</a>
+    </aside>
+  </div>
+  <section class="art-wrap art-related">
+    <h2>Continue exploring</h2>
+    <div class="related-grid">
+      {relatedItems.map(item => (
+        <a class="related-card" href={'/' + item.slug + '/'}>
+          <strong>{item.title.split('|')[0].trim()}</strong>
+          <span>Explore this collection</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</DiscoveryLayout>
