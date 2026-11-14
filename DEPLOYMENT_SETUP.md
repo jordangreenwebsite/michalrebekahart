@@ -36,3 +36,7 @@ See `SEO_MEASUREMENT.md`; use real Search Console and inbox figures. Merely addi
 ## Optional privacy-friendly conversion analytics
 
 If you want an aggregate count of delivered form enquiries, add a Cloudflare Analytics Engine binding named `ART_ANALYTICS` with dataset `michal_rebekah_art_events`. The form handler writes one event after a successful provider acceptance. It writes no name, email, message, browser identifier or IP address. Without the binding the form works normally but no Cloudflare conversion event is stored. Search Console impressions and clicks still require Search Console access; this binding does not provide them.
+
+## Connecting art enquiries to the Prunus Media backend
+
+The form now uses Resend for email delivery and can optionally mirror the accepted enquiry to Prunus with an HMAC-signed webhook. Set `PRUNUS_LEADS_WEBHOOK_URL` and `PRUNUS_LEADS_WEBHOOK_SECRET` in Cloudflare after creating the receiving endpoint in Prunus. Email continues to work when the webhook is not connected. See [PRUNUS_BACKEND_HANDOFF.md](./PRUNUS_BACKEND_HANDOFF.md) for the exact payload, signature checks and tests. This is not a claim that an endpoint has already been created or connected.
