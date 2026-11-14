@@ -99,6 +99,12 @@ export function legacyHtml(route) {
       .replaceAll('Commisions', 'Commissions');
   }
   if (route === '/journal/') html = html.replaceAll('peice', 'piece');
+  if (route === '/privacy-policy/') {
+    html = html.replace(
+      /<p data-start="1069"[\s\S]*?<hr data-start="1414"[^>]*>/,
+      '<p>The enquiry form on this static website prepares an email in your own email application. The site does not send the message or store its contents when you prepare it. If you choose to send the email, your email provider and ours will process it so we can reply.</p><p>You can also contact us through the published WhatsApp link.</p><hr>'
+    );
+  }
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
   html = html.replace(/<img\b[^>]*>/gi, (tag) => {
     if (/\balt\s*=/i.test(tag)) return tag;
