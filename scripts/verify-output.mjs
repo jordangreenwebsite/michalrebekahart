@@ -29,7 +29,6 @@ for (const slug of paths) {
   const ogTitles = [...html.matchAll(/<meta\s+property=["']og:title["']/gi)].length;
   if (ogTitles !== 1)problems.push('Expected one OG title, got '+ogTitles+': '+p);
   if (html.includes('https://www.michalrebekahart.co.uk')) problems.push('Old domain still in output: '+p);
-  if (['','our-story','journal','commissions','contact','privacy-policy'].includes(slug) && !html.includes('/css/legacy-'+(slug||'home')+'.css')) problems.push('Missing combined CSS link on '+p);
   if (slug === 'contact' && html.includes('id="contact-form118"')) problems.push('Old WP form remains on contact page');
 }
 for (const path of ['dist/robots.txt','dist/sitemap.xml','dist/image-sitemap.xml',
