@@ -26,7 +26,7 @@ export async function signedPrunusLead({env,lead,resendId,now=Date.now(),fetchIm
     event:'art.enquiry.created',
     event_id:eventId,
     source:'michal-rebekah-art',
-    source_url:'https://www.michalrebekahart.co.uk/contact/',
+    source_url:'https://www.michalrebekahart.com/contact/',
     received_at:new Date(now).toISOString(),
     lead:{
       name:lead.name,
