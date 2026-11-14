@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { artwork, describeImage } from '../data/artwork.mjs';
 import { renderSiteHeader } from '../data/site-nav.mjs';
+import { artworkThumb } from './image-paths.mjs';
 
 const ROOT = 'https://www.michalrebekahart.com';
 const known = {
@@ -158,6 +159,22 @@ export function legacyHtml(route) {
       ? html.replace(/<meta name="description"[^>]*>/i, tag)
       : html.replace('</head>', tag + '</head>');
   }
+  // Remove WordPress metadata and RankMath structured data that belong to the
+  // old domain. Astro provides one consistent canonical/OG/schema set instead.
+  html = html.replace(/<script\b[^>]*class="rank-math-schema"[^>]*>[\s\S]*?<\/script>/gi,'');
+  html = html.replace(/<meta\s+property="og:(?:title|description|url|site_name)"[^>]*>/gi,'');
+  html = html.replace(/<meta\s+name="twitter:(?:title|description|card)"[^>]*>/gi,'');
+  html = html.replace(/<meta\s+name="generator"[^>]*>/gi,'');
+  html = html.replace(/<link\s+rel="alternate"[^>]*oembed[^>]*>/gi,'');
+  // The new header and painting viewer no longer depend on WordPress's bulky
+  // Awesome Menu or LightGallery presentation sheets.
+  html = html.replace(/<link\s+rel="stylesheet"[^>]*href="[^"]*(?:awesome-menu\.css|lightgallery-bundle\.min\.css)[^"]*"[^>]*>/gi,'');
+  html = html.replace(/<script\b[^>]*src="[^"]*(?:awesome-menu|lightgallery)[^"]*"[^>]*>\s*<\/script>/gi,'');
+  // Preserve the site's exact font families but request only weights in use.
+  const fontLink = '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@400;500;600&amp;family=Lato:wght@400;700&amp;display=swap">';
+  html = html.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]+"\s*>/i,fontLink);
   const title = config.title;
   const description = config.desc || html.match(/<meta name="description" content="([^"]*)"/i)?.[1] || 'Original watercolour and oil artwork from the Cotswolds.';
   const headExtras = [
@@ -169,6 +186,18 @@ export function legacyHtml(route) {
   ].join('\n');
   html = html.replace('</head>', headExtras + '</head>');
   html = html.replace('</head>', '<link rel="stylesheet" href="/site-nav.css"><script defer src="/site-nav.js"></script></head>');
+  if (route === '/') {
+    // CSS background photos are discovered late. The two high-priority preload
+    // tags let the browser choose a small mobile or desktop asset immediately.
+    const heroHead = '<link rel="preload" as="image" type="image/webp" '
+      + 'href="/images/home-hero-mobile.webp" media="(max-width: 767px)" fetchpriority="high">'
+      + '<link rel="preload" as="image" type="image/webp" '
+      + 'href="/images/home-hero-desktop.webp" media="(min-width: 768px)" fetchpriority="high">'
+      + '<style>.breakdance .bde-section-27-100{background-image:url(/images/home-hero-desktop.webp)!important}'
+      + '@media(max-width:767px){.breakdance .bde-section-27-100{background-image:url(/images/home-hero-mobile.webp)!important}}</style>';
+    html = html.replace('</head>',heroHead+'</head>');
+  }
+
   html = html.replace('</head>', '<link rel="stylesheet" href="/art-experience.css"><script defer src="/art-experience.js"></script></head>');
   html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/i, renderSiteHeader(route));
   const studioSchema = {
@@ -200,9 +229,29 @@ export function legacyHtml(route) {
     const alt = checked || (/\balt\s*=/i.test(tag)
       ? tag.match(/\balt=["']([^"']*)/i)?.[1] || ''
       : imageFallback(src, route));
-    return /\balt\s*=/i.test(tag)
+    let result = /\balt\s*=/i.test(tag)
       ? tag.replace(/\balt=["'][^"']*["']/i, 'alt="' + escapeAttr(alt) + '"')
       : tag.replace(/\s*\/?\s*>$/, ' alt="' + escapeAttr(alt) + '">');
+    if (/story-Logo/i.test(src)) {
+      // The old markup told mobile browsers to fetch a 1500px+ logo for a 52px
+      // header. Use the crisp 150px asset instead, without its giant srcset.
+      result = result.replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+    }
+    if (route === '/' && src.includes('/2026/01/pexels-anete-lusina-')) {
+      result = result.replace(/\bsrc=["'][^"']*["']/i,'src="/images/artist-at-easel.webp"')
+        .replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+      if (!/\bloading=/i.test(result)) result = result.replace(/>$/, ' loading="lazy" decoding="async">');
+    } else if (route === '/' && artwork.some(item => src.split('/').pop().startsWith(item.id))) {
+      result = result.replace(/\bsrc=["'][^"']*["']/i,'src="' + artworkThumb(src) + '"')
+        .replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+      if(!/\bdecoding=/i.test(result))result=result.replace(/>$/, ' decoding="async">');
+    } else if (!/\bloading=/i.test(result) && !/story-Logo/i.test(src) && route !== '/') {
+      result = result.replace(/>$/, ' loading="lazy" decoding="async">');
+    }
+    return result;
   });
   // Give the original gallery lightbox readable captions without changing photo order.
   if (route === '/') {
