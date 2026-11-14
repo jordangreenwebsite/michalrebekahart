@@ -41,7 +41,13 @@ export async function onRequestPost({ request, env, context }) {
       message.length < 15 || message.length > 5000) {
     return json({ok:false,message:'Please add your name, a valid email address and a message of at least 15 characters.'},422);
   }
-  if (!env.RESEND_API_KEY || !env.CONTACT_FROM_EMAIL || !env.CONTACT_TO_EMAIL) {
+  // The Cloudflare Pages project may already have QUOTE_* secrets shared with
+  // other Prunus forms. Accept them without requiring duplicate configuration.
+  const sender = String(env.CONTACT_FROM_EMAIL || env.QUOTE_FROM_EMAIL || '').trim();
+  const rawRecipients = String(env.CONTACT_TO_EMAIL || env.QUOTE_TO_EMAIL || '');
+  const recipients = rawRecipients.split(/[,;\n]/).map(x=>x.trim())
+    .filter(x=>/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(x)).slice(0,5);
+  if (!env.RESEND_API_KEY || !sender || !recipients.length) {
     return json({ok:false,message:'The enquiry form is temporarily unavailable. Please use the email or WhatsApp link below.'},503);
   }
   const cleanName = name.replace(/[\r\n]/g,' ');
@@ -53,8 +59,8 @@ export async function onRequestPost({ request, env, context }) {
       method:'POST',
       headers:{ Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json' },
       body:JSON.stringify({
-        from:env.CONTACT_FROM_EMAIL,
-        to:[env.CONTACT_TO_EMAIL],
+        from:sender,
+        to:recipients,
         reply_to:email,
         subject:'New painting enquiry from '+cleanName,
         text:plainText
