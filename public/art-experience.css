@@ -110,3 +110,5 @@
 @media(prefers-reduced-motion:reduce){
   .mra-curated-gallery .mra-painting-card img,.artwork-card a img{transition:none!important;transform:none!important}
 }
+
+body.mra-viewing-art{overflow:hidden}
