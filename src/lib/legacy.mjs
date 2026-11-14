@@ -172,7 +172,9 @@ export function legacyHtml(route) {
   // Add a genuine grouped menu to every preserved route.
   html = html.replace(/(<li class="breakdance-menu-item-19-116 breakdance-menu-item">)/i,
     legacyExploreNav() + '$1');
-  html = html.replace('</head>', '<link rel="stylesheet" href="/art-navigation.css"></head>');
+  html = html.replace('</head>', '<link rel="stylesheet" href="/art-navigation.css">'
+    + '<link rel="stylesheet" href="/art-experience.css">'
+    + '<script src="/art-experience.js" defer></script></head>');
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
   html = html.replace(/<img\b[^>]*>/gi, (tag) => {
     const src = tag.match(/\bsrc=["']([^"']+)/i)?.[1] || '';
@@ -192,7 +194,10 @@ export function legacyHtml(route) {
       if (!item) return tag;
       return tag.replace(/data-sub-html="[^"]*"/,
         'data-sub-html="' + escapeAttr('<p>' + item.caption + '</p>') + '"')
-        .replace(/>$/, ' aria-label="Open painting: ' + escapeAttr(item.alt) + '">');
+        .replace(/>$/, ' data-artwork-open data-art-category="' + escapeAttr(item.category)
+          + '" data-art-title="' + escapeAttr(item.caption)
+          + '" data-art-description="' + escapeAttr(item.alt)
+          + '" aria-label="Open painting: ' + escapeAttr(item.alt) + '">');
     });
     html = html.replace(/(<h2\b[^>]*>\s*Family\s*<\/h2>)/i,
       '$1<p class="art-description-link"><a href="/artwork-guide/">Browse the paintings with descriptions</a></p>');
