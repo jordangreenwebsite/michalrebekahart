@@ -28,7 +28,7 @@ const imageFallback = (src, route) => {
 function meta(name, content, property = false) {
   return '<meta ' + (property ? 'property' : 'name') + '="' + name + '" content="' + escapeAttr(content) + '">';
 }
-const contactForm = \`<form id="rebekah-contact-form" class="breakdance-form breakdance-form--vertical" action="/api/contact" method="post">
+const contactForm = `<form id="rebekah-contact-form" class="breakdance-form breakdance-form--vertical" action="/api/contact" method="post">
   <div class="breakdance-form-field breakdance-form-field--text">
     <label class="breakdance-form-field__label" for="art-name">Your name *</label>
     <input class="breakdance-form-field__input" id="art-name" name="name" autocomplete="name" maxlength="120" required>
@@ -72,7 +72,7 @@ const contactForm = \`<form id="rebekah-contact-form" class="breakdance-form bre
       }
     });
   })();
-</script>\`;
+</script>`;
 
 const extraCSS = `<style>
 .art-discover-footer{background:#F7F5F3;text-align:center;padding:14px 16px;font:14px Inter,sans-serif}
