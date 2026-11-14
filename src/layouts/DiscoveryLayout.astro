@@ -1,0 +1,92 @@
+---
+import '../styles/discovery.css';
+const { title, description, image, place, kind = 'article' } = Astro.props;
+const canonical = Astro.url.toString();
+const site = 'https://www.michalrebekahart.co.uk';
+const personId = site + '/#artist';
+const studioId = site + '/#studio';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type':'Person', '@id':personId, name:'Michal Rebekah',
+      jobTitle:'Watercolour and oil artist', url:site + '/our-story/',
+      sameAs:['https://www.instagram.com/michalrebekahart/'] },
+    { '@type':'ProfessionalService', '@id':studioId, name:'Michal Rebekah Art',
+      url:site + '/', email:'michalrebekahart@gmail.com', telephone:'+447586768679',
+      sameAs:['https://www.instagram.com/michalrebekahart/'],
+      areaServed:['Cirencester','Cotswolds','Gloucestershire','Swindon','Cheltenham','Bath'],
+      founder:{'@id':personId},
+      description:'Original watercolour and oil paintings and occasional personalised art commissions based in Cirencester, Cotswolds.' },
+    { '@type':'WebPage', '@id':canonical, url:canonical,name:title,description,
+      isPartOf:{'@type':'WebSite',url:site + '/',name:'Michal Rebekah Art'} },
+    ...(kind === 'article' ? [
+      { '@type':'Service',name:place ? 'Art commission enquiries for ' + place : 'Original artwork and personal painting enquiries',
+        provider:{'@id':studioId},areaServed:place || 'Cotswolds',url:canonical }
+    ] : [])
+  ]
+};
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href={canonical} />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={site + (image || '/wp-content/uploads/2026/01/story-Logo.png')} />
+  <meta property="og:site_name" content="Michal Rebekah Art" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={site + (image || '/wp-content/uploads/2026/01/story-Logo.png')} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="art-header">
+    <a class="art-logo" href="/" aria-label="Michal Rebekah Art, home">
+      <img src="/wp-content/uploads/2026/01/story-Logo-150x150.png" alt="Michal Rebekah Art illustrated logo" width="60" height="60" />
+      <span>Michal Rebekah Art</span>
+    </a>
+    <nav class="art-desktop-nav" aria-label="Main navigation">
+      <a href="/">Home</a>
+      <a href="/our-story/">My story</a>
+      <a href="/journal/">Journal</a>
+      <a href="/artwork-and-commissions/">Artwork & commissions</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+    <details class="art-mobile-nav">
+      <summary>Menu</summary>
+      <nav aria-label="Mobile navigation">
+        <a href="/">Home</a>
+        <a href="/our-story/">My story</a>
+        <a href="/journal/">Journal</a>
+        <a href="/artwork-and-commissions/">Artwork & commissions</a>
+        <a href="/commissions/">Personalised artwork</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </details>
+  </header>
+  <main id="main"><slot /></main>
+  <footer class="art-footer">
+    <div class="footer-top">
+      <div><h2>Some moments deserve to be remembered.</h2><p>If a piece speaks to you, I would love to hear from you.</p></div>
+      <a class="art-button" href="/contact/">Get in touch</a>
+    </div>
+    <div class="footer-bottom">
+      <a href="/">Home</a><a href="/our-story/">My story</a><a href="/journal/">Journal</a><a href="/artwork-and-commissions/">Artwork</a><a href="/privacy-policy/">Privacy</a>
+      <a href="mailto:michalrebekahart@gmail.com">Email</a><a href="https://www.instagram.com/michalrebekahart/">Instagram</a>
+    </div>
+    <p class="copyright">© 2026 Michal Rebekah Art. Website by <a href="https://prunusmedia.com/">Prunus Media</a>.</p>
+  </footer>
+</body>
+</html>
