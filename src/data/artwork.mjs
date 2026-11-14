@@ -48,7 +48,7 @@ export const pagePhotos = [
   ['IMG_2592','Black-and-white photograph of Michal wearing a sunhat in front of a weathered wooden window.'],
   ['IMG_6943','Interior of Coffee at Odd Socks with tables, chairs and a coffee counter.'],
   ['IMG_6947','The Coffee at Odd Socks shopfront and welcome board in Cirencester.'],
-  ['PHOTO-2026-03-26','Artwork photographed in the local coffee shop.'],
+  ['PHOTO-2026-03-26','Original mounted paintings displayed on a café table beside the Michal Rebekah Art information and payment sign.'],
   ['IMG_6326','Michal Rebekah painting at a table beside a window.'],
   ['IMG_5136','Unframed painting of a couple in a boat being measured before presentation.'],
   ['IMG_6880','Framed painting of two travellers with suitcases and an aeroplane.'],
