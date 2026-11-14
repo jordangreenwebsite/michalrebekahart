@@ -36,6 +36,43 @@ export const artwork = [
   ['IMG_7358','Friendship & Serenity','Two people in cricket whites, one holding a bat while the other raises a drink from the grass.','A break between overs, with a drink and a cricket bat.']
 ].map(([id,category,alt,caption])=>({id,category,alt,caption}));
 
+const editorialTitles = {
+  "IMG_6425": "Together in the grass",
+  "IMG_6426": "Red ribbons",
+  "IMG_6429": "Down at their level",
+  "IMG_6432": "An afternoon walk",
+  "IMG_6437": "Between them",
+  "IMG_7363": "Hand in hand",
+  "IMG_7361": "A little way together",
+  "IMG_6439": "Along the shore",
+  "IMG_6438": "Side by side",
+  "IMG_6431": "Close to you",
+  "IMG_6881": "Ready to go",
+  "IMG_6436": "The kite",
+  "IMG_6435": "One more chapter",
+  "IMG_6434": "The walk home",
+  "IMG_6433": "After ballet",
+  "IMG_6428": "At the water's edge",
+  "IMG_6427": "Teddy in hand",
+  "IMG_7365": "A shared secret",
+  "IMG_7364": "Before the dance",
+  "IMG_7359": "Practice with company",
+  "IMG_7357": "Thinking it through",
+  "IMG_6440": "The flower stall",
+  "IMG_6430": "An afternoon conversation",
+  "IMG_6424": "A moment by the water",
+  "IMG_6423": "Looking out",
+  "IMG_6422": "Under the sunhat",
+  "IMG_6420": "Out for the day",
+  "IMG_6421": "A day at the beach",
+  "IMG_6419": "The red dress",
+  "IMG_6418": "Time for tea",
+  "IMG_7360": "On the polo field",
+  "IMG_7358": "Between overs"
+};
+export function editorialTitle(id) { return editorialTitles[id] || 'Untitled artwork'; }
+artwork.forEach(item => {item.title=editorialTitle(item.id);});
+
 export const pagePhotos = [
   ['story-Logo','Michal Rebekah Art illustrated logo'],
   ['pexels-anete-lusina','Stock photograph of a woman painting at a small easel beside a window.'],
