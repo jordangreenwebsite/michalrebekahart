@@ -235,6 +235,7 @@ export function legacyHtml(route) {
     html = html.replace(/(<body\b[^>]*>)/i, '$1<h1 class="sr-only-art">Michal Rebekah Art</h1>');
   }
   if (route === '/contact/') {
+    html = html.replace('</head>', '<link rel="stylesheet" href="/contact-form.css"></head>');
     // The exported Breakdance form sends to WP admin-ajax.php and cannot work on static Astro.
     html = html.replace(/<form id="contact-form118"[\s\S]*?<\/form>/i, contactForm);
   }
