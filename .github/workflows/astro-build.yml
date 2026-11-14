@@ -26,11 +26,13 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Check desktop/mobile pages, forms and take screenshots
         run: npm run test:browser
+      - name: Validate complete menus, small-screen hit areas and dropdowns
+        run: npm run test:navigation
       - name: Upload visual comparison screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: michal-art-qa-screenshots
-          path: qa/screenshots/
+          path: |\n            qa/screenshots/\n            qa/navigation/
           if-no-files-found: ignore
 
