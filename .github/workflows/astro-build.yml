@@ -22,3 +22,15 @@ jobs:
         run: npm test
       - name: Build Astro and verify output
         run: npm run build
+      - name: Install Chromium for real browser QA
+        run: npx playwright install --with-deps chromium
+      - name: Check desktop/mobile pages, forms and take screenshots
+        run: npm run test:browser
+      - name: Upload visual comparison screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: michal-art-qa-screenshots
+          path: qa/screenshots/
+          if-no-files-found: ignore
+
