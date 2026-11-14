@@ -10,7 +10,7 @@ const legacy = ['index.html', 'our-story/index.html', 'journal/index.html',
   'commissions/index.html', 'contact/index.html', 'privacy-policy/index.html'];
 const queue = [];
 const seen = new Set();
-const allowed = /^\/(wp-content|wp-includes)\/[A-Za-z0-9_./%@+-]+/g;
+const allowed = /\/(wp-content|wp-includes)\/[A-Za-z0-9_./%@+-]+/g;
 
 function add(input) {
   if (!input) return;
@@ -46,7 +46,7 @@ for (let cursor = 0; cursor < queue.length; cursor++) {
     await mkdir(dirname(output), { recursive: true });
     await copyFile(source, output);
     copied++;
-    if (['.css', '.js'].includes(extname(source))) scan(await readFile(source, 'utf8'), source);
+    if (extname(source) === '.css') scan(await readFile(source, 'utf8'), source);
   } catch (e) {
     if (e.code === 'ENOENT') missing.push(path);
     else throw e;
