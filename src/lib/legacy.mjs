@@ -169,7 +169,16 @@ export function legacyHtml(route) {
   // The new header and painting viewer no longer depend on WordPress's bulky
   // Awesome Menu or LightGallery presentation sheets.
   html = html.replace(/<link\s+rel="stylesheet"[^>]*href="[^"]*(?:awesome-menu\.css|lightgallery-bundle\.min\.css)[^"]*"[^>]*>/gi,'');
-  html = html.replace(/<script\b[^>]*src="[^"]*(?:awesome-menu|lightgallery)[^"]*"[^>]*>\s*<\/script>/gi,'');
+  // The old export used single-quoted script src attributes. None of these
+  // scripts are needed after replacing the menu and gallery with accessible
+  // native components. Removing them avoids hidden LightGallery thumbnails,
+  // mobile horizontal overflow and unnecessary JS downloads.
+  const unusedScripts = /(?:breakdance-header-builder@1\/header-builder|awesome-menu@1\/awesome-menu|isotope-layout@3\.0\.6\/isotope|lightgallery@2\/lightgallery|elements-reusable-code\/lightbox|breakdance-gallery@1\/gallery)\.?(?:pkgd\.min)?\.js/;
+  html = html.replace(/<script\b[^>]*\bsrc\s*=\s*(['"])(.*?)\1[^>]*>\s*<\/script>/gi,
+    (tag,_quote,src)=>unusedScripts.test(src)?'':tag);
+  html = html.replace(/<script\b[^>]*>\s*document\.addEventListener\('DOMContentLoaded',[\s\S]*?<\/script>/gi,
+    tag=>/new\s+(?:BreakdanceHeaderBuilder|AwesomeMenu|BreakdanceLightbox|BreakdanceGallery)\s*\(/.test(tag)?'':tag);
+  html = html.replace(/<script\s+type="speculationrules">[\s\S]*?<\/script>/gi,'');
   // Preserve the site's exact font families but request only weights in use.
   const fontLink = '<link rel="preconnect" href="https://fonts.googleapis.com">'
     + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
