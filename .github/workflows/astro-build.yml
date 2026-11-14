@@ -2,7 +2,7 @@ name: Validate Astro rebuild
 on:
   push:
     branches:
-      - astro-exact-rebuild-seo-2026-11-14
+      - main
   pull_request:
     branches:
       - main
