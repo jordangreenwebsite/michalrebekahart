@@ -26,7 +26,7 @@
   }
 
   const links=[...document.querySelectorAll('a[data-mra-lightbox]')];
-  if (!links.length || !HTMLDialogElement || !HTMLDialogElement.prototype.showModal) return;
+  if (!links.length || typeof HTMLDialogElement === 'undefined' || !HTMLDialogElement.prototype.showModal) return;
 
   const dialog=document.createElement('dialog');
   dialog.className='mra-lightbox';
