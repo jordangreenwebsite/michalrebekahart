@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { artwork, describeImage } from '../data/artwork.mjs';
+import { renderSiteHeader } from '../data/site-nav.mjs';
 
 const ROOT = 'https://www.michalrebekahart.co.uk';
 const known = {
@@ -145,6 +146,8 @@ export function legacyHtml(route) {
     extraCSS
   ].join('\n');
   html = html.replace('</head>', headExtras + '</head>');
+  html = html.replace('</head>', '<link rel="stylesheet" href="/site-nav.css"><script defer src="/site-nav.js"></script></head>');
+  html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/i, renderSiteHeader(route));
   const studioSchema = {
     '@context':'https://schema.org', '@type':'ProfessionalService',
     '@id':ROOT + '/#studio', name:'Michal Rebekah Art', url:ROOT + '/',
