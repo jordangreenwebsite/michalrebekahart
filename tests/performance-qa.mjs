@@ -47,6 +47,26 @@ try{
     const res=performance.getEntriesByType('resource');
     return {
       lcp:window.__mraLcp,
+      fontMetrics:(()=>{
+        const h=document.querySelector('.bde-heading-27-216');
+        if(!h)return null;
+        const canvas=document.createElement('canvas').getContext('2d');
+        const text='Watercolour Artist in the Cotswolds';
+        canvas.font='500 48px "Playfair Display"';
+        const playfairWidth=canvas.measureText(text).width;
+        canvas.font='500 48px Georgia';
+        const georgiaWidth=canvas.measureText(text).width;
+        const rect=h.getBoundingClientRect();
+        const clone=h.cloneNode(true);
+        clone.style.cssText='position:absolute;top:-10000px;left:0;visibility:hidden;width:'+rect.width+'px;font-family:Georgia,serif!important;';
+        document.body.appendChild(clone);
+        const fallbackHeight=clone.getBoundingClientRect().height;
+        clone.remove();
+        return {playfairLoaded:document.fonts.check('500 48px "Playfair Display"'),
+          playfairWidth,georgiaWidth,relativeWidth:playfairWidth/georgiaWidth,
+          headingHeight:rect.height,georgiaHeadingHeight:fallbackHeight};
+      })(),
+
       document:performance.getEntriesByType('navigation')[0]?.duration,
       heroBackground:getComputedStyle(document.querySelector('.bde-section-27-100')).backgroundImage,
       hasMobilePreload:!!document.querySelector('link[rel="preload"][href="/images/home-hero-mobile.webp"]'),
