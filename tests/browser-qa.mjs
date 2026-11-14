@@ -32,6 +32,9 @@ try {
       '/artist-in-swindon/','/family-painting-commissions/'];
     for(const route of routes){
       await goto(page,route);
+      assert.equal(await page.locator('[data-mra-header]').count(),1,'Shared navigation '+route);
+      assert.ok(await page.locator('.mra-brand').isVisible(),'Brand visible '+route);
+      assert.ok(await page.locator('.mra-header-inner').boundingBox(),'Header has allocated space '+route);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
       if(overflow>6) {
         const offenders=await page.evaluate(()=>{
@@ -49,9 +52,24 @@ try {
     await goto(page,'/');
     const galleryCount=await page.locator('.ee-gallery-item--image').count();
     assert.ok(galleryCount>=30,'Original paintings still visible in homepage gallery: '+galleryCount);
+    assert.equal(await page.locator('.mra-painting-card').count(),32,'Original gallery paintings retained');
+    assert.equal(await page.locator('.mra-art-caption h3').count(),32,'Visible picture titles underneath paintings');
+    await page.locator('.mra-painting-card a[data-mra-lightbox]').first().click();
+    await page.locator('dialog.mra-lightbox[open]').waitFor();
+    assert.ok((await page.locator('.mra-lightbox-title').innerText()).length>3,'Lightbox title');
+    assert.ok((await page.locator('.mra-lightbox-description').innerText()).length>10,'Lightbox description');
+    await page.locator('.mra-lightbox-next').click();
+    assert.ok((await page.locator('.mra-lightbox-count').innerText()).startsWith('2 of '),'Next image works');
+    await page.locator('.mra-lightbox-close').click();
+    assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Close button dismisses lightbox');
     await page.screenshot({path:out+'/rebuilt-home-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     await goto(page,'/artwork-guide/');
     const captionCount=await page.locator('.artwork-card figcaption').count();
+    assert.equal(await page.locator('.artwork-card h3').count(),32,'Each art-guide image has a title');
+    await page.locator('.artwork-card a[data-mra-lightbox]').first().click();
+    await page.locator('dialog.mra-lightbox[open]').waitFor();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Escape closes image viewer');
     assert.equal(captionCount,32,'32 visible artwork descriptions');
     await page.screenshot({path:out+'/artwork-guide-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     if(viewport.name==='desktop'){
@@ -60,6 +78,20 @@ try {
       assert.ok(firstAlt?.includes('straw hat'),'First painting has accurate alt');
       const artworkImages=await page.locator('.artwork-card img').count();
       assert.equal(artworkImages,32);
+    }
+    await goto(page,'/');
+    if(viewport.width<=1100) {
+      await page.locator('.mra-mobile-menu>summary').click();
+      assert.ok(await page.locator('.mra-mobile-panel').isVisible(),'Mobile menu opens');
+      await page.locator('.mra-mobile-panel .mra-menu-group[data-kind="areas"]>summary').click();
+      const link=page.locator('.mra-mobile-panel a[href="/artist-in-cirencester/"]');
+      assert.ok(await link.isVisible(),'Location page accessible through mobile menu');
+      await page.keyboard.press('Escape');
+      assert.equal(await page.locator('.mra-mobile-menu[open]').count(),0,'Escape closes menu');
+    } else {
+      await page.locator('.mra-desktop-nav .mra-menu-group[data-kind="artwork"]>summary').click();
+      assert.ok(await page.locator('.mra-desktop-nav a[href="/family-painting-commissions/"]').isVisible(),'Artwork page accessible through desktop menu');
+      await page.keyboard.press('Escape');
     }
     await goto(page,'/contact/');
     await page.route('**/api/contact', async route=>{
