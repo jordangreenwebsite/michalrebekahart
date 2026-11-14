@@ -29,73 +29,95 @@ const imageFallback = (src, route) => {
 function meta(name, content, property = false) {
   return '<meta ' + (property ? 'property' : 'name') + '="' + name + '" content="' + escapeAttr(content) + '">';
 }
-const contactForm = `<form id="rebekah-contact-form" class="art-native-form" action="/api/contact" method="post">
-  <div class="art-native-field">
-    <label class="art-native-label" for="art-name">Your name *</label>
-    <input class="art-native-input" id="art-name" name="name" autocomplete="name" maxlength="120" required>
+const contactForm = `<form id="rebekah-contact-form" class="art-native-form mra-contact-form" action="/api/contact" method="post">
+  <div class="mra-contact-intro">
+    <p class="mra-contact-eyebrow">A note from the studio</p>
+    <h3>Tell me a little about your idea.</h3>
+    <p>Perhaps you've seen a painting you love, or there's a memory you'd like to keep in a more personal way. You don't need to have it all worked out before getting in touch.</p>
+    <p>I'd love to hear what you have in mind.</p>
+    <div class="mra-contact-other">
+      <span>Prefer to write directly?</span>
+      <a href="mailto:michalrebekahart@gmail.com">michalrebekahart@gmail.com</a>
+      <a href="https://wa.me/447586768679">Or send me a WhatsApp message</a>
+    </div>
   </div>
-  <div class="art-native-field">
-    <label class="art-native-label" for="art-email">Your email *</label>
-    <input class="art-native-input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+  <div class="mra-contact-fields">
+    <p class="mra-contact-form-heading">Your enquiry</p>
+    <div class="mra-contact-pair">
+      <div class="art-native-field">
+        <label class="art-native-label" for="art-name">Your name <span aria-hidden="true">*</span></label>
+        <input class="art-native-input" id="art-name" name="name" autocomplete="name" maxlength="120" placeholder="Your name" required>
+      </div>
+      <div class="art-native-field">
+        <label class="art-native-label" for="art-email">Email address <span aria-hidden="true">*</span></label>
+        <input class="art-native-input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+      </div>
+    </div>
+    <div class="art-native-field">
+      <label class="art-native-label" for="art-category">What can I help you with?</label>
+      <select class="art-native-input mra-contact-select" id="art-category" name="category">
+        <option value="general">Just a question</option>
+        <option value="original_artwork">A painting I've seen</option>
+        <option value="personalised_painting">A personalised painting</option>
+        <option value="childrens_book">A children's book illustration</option>
+        <option value="business_artwork">Artwork for a business or shared space</option>
+        <option value="other">Something else</option>
+      </select>
+    </div>
+    <div class="art-native-field">
+      <label class="art-native-label" for="art-message">Tell me a little more <span aria-hidden="true">*</span></label>
+      <textarea class="art-native-input mra-contact-message" id="art-message" name="message" maxlength="5000" minlength="15" rows="7" placeholder="What are you thinking of? Is there a particular painting or memory behind your idea?" required></textarea>
+    </div>
+    <div class="art-honeypot" aria-hidden="true">
+      <label for="art-website">Leave this field empty</label>
+      <input id="art-website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+    <div class="mra-contact-actions">
+      <button type="submit" class="art-native-submit"><span>Send my enquiry</span></button>
+      <p class="art-form-small">Your details are used only to reply to your enquiry. <a href="/privacy-policy/">Privacy policy</a></p>
+    </div>
+    <p class="art-form-status" id="art-form-status" role="status" aria-live="polite"></p>
   </div>
-  <div class="art-native-field">
-    <label class="art-native-label" for="art-category">What are you enquiring about?</label>
-    <select class="art-native-input" id="art-category" name="category">
-      <option value="general">A general enquiry</option>
-      <option value="original_artwork">An original painting</option>
-      <option value="personalised_painting">A personalised painting</option>
-      <option value="childrens_book">Children's book illustration</option>
-      <option value="business_artwork">Artwork for a business or shared space</option>
-      <option value="other">Something else</option>
-    </select>
-  </div>
-  <div class="art-native-field">
-    <label class="art-native-label" for="art-message">Tell me a little about your idea *</label>
-    <textarea class="art-native-input" id="art-message" name="message" maxlength="5000" minlength="15" rows="6" required></textarea>
-  </div>
-  <div class="art-honeypot" aria-hidden="true">
-    <label for="art-website">Leave this field empty</label>
-    <input id="art-website" name="website" tabindex="-1" autocomplete="off">
-  </div>
-  <button type="submit" class="art-native-submit">Send message</button>
-  <p class="art-form-status" id="art-form-status" role="status" aria-live="polite"></p>
-  <p class="art-form-small">Your name, email and message are used to reply to your enquiry. See our <a href="/privacy-policy/">privacy policy</a>.</p>
 </form>
 <script>
   (function () {
     const form=document.getElementById('rebekah-contact-form');
     const status=document.getElementById('art-form-status');
     if(!form||!status)return;
+    const button=form.querySelector('button[type="submit"]');
+    const buttonLabel=button.querySelector('span');
+    const originalLabel=buttonLabel.textContent;
     form.addEventListener('submit',async function(e) {
       e.preventDefault();
-      const button=form.querySelector('button[type="submit"]');
+      if(button.disabled)return;
       button.disabled=true;
+      button.classList.add('mra-sending');
+      buttonLabel.textContent='Sending...';
+      status.removeAttribute('data-sent');
       status.textContent='Sending your message...';
       try {
         const response=await fetch('/api/contact',{method:'POST',body:new FormData(form)});
         const result=await response.json();
-        status.textContent=result.message||(response.ok?'Message received.':'Please try again or use the email link below.');
-        if(response.ok&&result.ok){form.reset();status.setAttribute('data-sent','true');}
-        else {
-          status.removeAttribute('data-sent');
-          if(response.status===503) {
-            const data=new FormData(form);
-            const subject='Artwork enquiry from ' + data.get('name');
-            const body='Name: ' + data.get('name') + '\\nEmail: ' + data.get('email') +
-              '\\n\\n' + data.get('message');
-            const link=document.createElement('a');
-            link.href='mailto:michalrebekahart@gmail.com?subject='
-              + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-            link.textContent='Open your email app with your message ready';
-            link.style.display='block';
-            link.style.marginTop='12px';
-            status.appendChild(link);
-          }
+        status.textContent=result.message||(response.ok?'Your message has been received.':'Please try again or email me directly.');
+        if(response.ok&&result.ok){
+          form.reset();
+          status.setAttribute('data-sent','true');
+        }else if(response.status===503){
+          const data=new FormData(form);
+          const subject='Artwork enquiry from '+data.get('name');
+          const body='Name: '+data.get('name')+'\\nEmail: '+data.get('email')+'\\n\\n'+data.get('message');
+          const link=document.createElement('a');
+          link.href='mailto:michalrebekahart@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+          link.textContent='Open your email app with the message ready';
+          status.appendChild(document.createTextNode(' '));
+          status.appendChild(link);
         }
-      } catch {
-        status.textContent='The form could not connect. Please use the email or WhatsApp link below.';
-      } finally {
+      }catch{
+        status.textContent='The form could not connect. Please email me directly using the address shown here.';
+      }finally{
         button.disabled=false;
+        button.classList.remove('mra-sending');
+        buttonLabel.textContent=originalLabel;
       }
     });
   })();
