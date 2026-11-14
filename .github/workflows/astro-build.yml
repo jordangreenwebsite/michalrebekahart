@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - astro-exact-rebuild-seo-2026-11-14
+      - fix-complete-navigation-responsive-2026-11-14
   pull_request:
     branches:
       - main
