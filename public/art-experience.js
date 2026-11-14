@@ -127,7 +127,7 @@
         observer.unobserve(entry.target);
         const element = entry.target;
         const delay = Math.min(3, Number(element.dataset.artStagger || 0)) * 55;
-        element.animate([
+        const motion = element.animate([
           { opacity: 0.55, transform: 'translate3d(0,14px,0)' },
           { opacity: 1, transform: 'translate3d(0,0,0)' }
         ], {
@@ -135,12 +135,8 @@
           easing: 'cubic-bezier(.22,1,.36,1)',
           delay,
           fill: 'both'
-        }).finished.then(() => {
-          for (const key of ['opacity','transform']) element.style.removeProperty(key);
-          element.getAnimations().forEach(animation => {
-            if (animation.playState === 'finished') animation.cancel();
-          });
-        }).catch(() => {});
+        });
+        motion.finished.then(() => motion.cancel()).catch(() => {});
       }
     }, { rootMargin: '0px 0px -35px 0px', threshold: 0.12 });
     targets.forEach((element, index) => {
