@@ -111,3 +111,29 @@ test('Resend failure never sends data to the optional Prunus integration',async(
     assert.equal(requests.length,1);
   } finally{globalThis.fetch=prior;}
 });
+
+test('current Cloudflare QUOTE_* variable names deliver through Resend to configured recipients',async()=>{
+  const originalFetch=globalThis.fetch;
+  try {
+    let sent;
+    globalThis.fetch=async(url,options)=>{ sent={url,body:JSON.parse(options.body)};return {ok:true,json:async()=>({id:'verified-test-id'})}; };
+    const response=await onRequestPost({request:makeForm(good),env:{
+      RESEND_API_KEY:'test-secret',
+      QUOTE_FROM_EMAIL:'enquiries@contact.prunusmedia.com',
+      QUOTE_TO_EMAIL:'michalrebekahart@hotmail.com, secondary@example.com'
+    }});
+    assert.equal(response.status,200);
+    assert.equal(sent.url,'https://api.resend.com/emails');
+    assert.equal(sent.body.from,'enquiries@contact.prunusmedia.com');
+    assert.deepEqual(sent.body.to,['michalrebekahart@hotmail.com','secondary@example.com']);
+  } finally {globalThis.fetch=originalFetch;}
+});
+
+test('invalid configured recipient prevents a false form success',async()=>{
+  const response=await onRequestPost({request:makeForm(good),env:{
+    RESEND_API_KEY:'test', QUOTE_FROM_EMAIL:'enquiries@contact.prunusmedia.com',
+    QUOTE_TO_EMAIL:'not-a-valid-email'
+  }});
+  assert.equal(response.status,503);
+  assert.equal((await response.json()).ok,false);
+});
