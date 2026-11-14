@@ -18,3 +18,12 @@ a{color:inherit}img{display:block;max-width:100%}h1,h2,h3{font-family:'Playfair 
 .art-footer{background:#e8ece9;padding:60px max(25px,calc((100vw - 1150px)/2));margin-top:25px}.footer-top{display:flex;align-items:center;justify-content:space-between;gap:30px;padding-bottom:45px;border-bottom:1px solid #d0d9d4}.footer-top h2{font-size:2rem;max-width:650px}.footer-bottom{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px;font-size:13px}.footer-bottom a{text-decoration:none}.copyright{font-size:12px;color:#55635e;margin-top:30px}.copyright a{text-underline-offset:3px}
 @media(max-width:950px){.art-desktop-nav{display:none}.art-mobile-nav{display:block}.art-hero{grid-template-columns:1fr;min-height:0;padding-top:35px}.art-hero .hero-art{max-height:500px}.related-grid,.art-hub-collections .related-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.art-header{min-height:72px;padding:8px 18px}.art-logo{font-size:14px;gap:7px}.art-logo img{width:46px;height:46px}.art-wrap{padding-left:21px;padding-right:21px}.art-hero{padding-bottom:45px;gap:32px}.art-copy{padding:35px 22px 60px}.art-copy p{font-size:1rem}.quiet-panel{padding:28px 24px}.related-grid,.art-hub-collections .related-grid{grid-template-columns:1fr}.art-related{padding-top:45px;padding-bottom:60px}.footer-top{align-items:flex-start;flex-direction:column}.art-footer{padding:38px 24px}.footer-bottom{gap:13px 20px}.art-hub-hero{padding-top:50px}}
+
+.artwork-collection{padding-top:35px;padding-bottom:72px}.artwork-collection h2{margin-bottom:24px}
+.artwork-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 18px}
+.artwork-card{margin:0;background:#fff;border:1px solid var(--line);padding:12px}
+.artwork-card a{display:block;background:#f2f1ee}.artwork-card img{width:100%;height:330px;object-fit:contain}
+.artwork-card figcaption{padding:14px 7px 7px;font-size:14px;line-height:1.65;color:#3f4b48}
+.art-copy h3{margin:32px 0 9px}
+@media(max-width:900px){.artwork-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.artwork-guide-grid{grid-template-columns:1fr}.artwork-card img{height:auto;max-height:430px}}
