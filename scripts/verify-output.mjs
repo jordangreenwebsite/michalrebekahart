@@ -15,7 +15,7 @@ for (const slug of paths) {
   if (!/<meta name="description"/i.test(html)) problems.push('No description: ' + p);
   if (slug === 'contact' && html.includes('id="contact-form118"')) problems.push('Old WP form remains on contact page');
 }
-for (const path of ['dist/robots.txt','dist/sitemap.xml',
+for (const path of ['dist/robots.txt','dist/sitemap.xml','dist/image-sitemap.xml',
   'dist/wp-content/uploads/2026/01/story-Logo-150x150.png',
   'dist/wp-content/uploads/2026/03/IMG_6425-768x1024.jpeg']) {
   try { await access(path); } catch { problems.push('Missing static file ' + path); }
