@@ -4,7 +4,7 @@
 export const entries = [
   {
     slug:'artist-in-cirencester', type:'area', place:'Cirencester',
-    title:'Watercolour & Oil Artist in Cirencester | Michal Rebekah Art',
+    title:'Original Artwork & Commissions in Cirencester | Michal Rebekah',
     description:'Meet Cirencester-based watercolour and oil artist Michal Rebekah. Explore paintings inspired by family and memories, and enquire about a personal commission.',
     eyebrow:'Home in the Cotswolds', lead:'Original watercolour and oil artwork shaped by ordinary moments, family life and the places that stay with us.',
     heading:'Art with a personal connection to Cirencester',

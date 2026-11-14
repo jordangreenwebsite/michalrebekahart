@@ -18,8 +18,8 @@
 .mra-site-header .mra-sub-link:hover,.mra-site-header .mra-sub-link[aria-current="page"]{background:#e9eeeb;color:#345c59}
 .mra-site-header [aria-current="page"]{text-decoration:underline;text-underline-offset:5px}
 .mra-header-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.mra-enquire,.mra-mobile-enquire{display:inline-flex;text-decoration:none!important;align-items:center;justify-content:center;background:#7B9B9A;color:#fff!important;font:500 13px Inter,Arial,sans-serif;min-height:38px;padding:9px 19px}
-.mra-enquire:hover,.mra-mobile-enquire:hover{background:#567e7b;color:#fff!important}
+.mra-enquire,.mra-mobile-enquire{display:inline-flex;text-decoration:none!important;align-items:center;justify-content:center;background:#486f6d;color:#fff!important;font:500 13px Inter,Arial,sans-serif;min-height:38px;padding:9px 19px}
+.mra-enquire:hover,.mra-mobile-enquire:hover{background:#365e5b;color:#fff!important}
 .mra-mobile-menu{display:none;position:relative;margin:0}
 .mra-mobile-menu>summary{list-style:none;display:flex;gap:8px;align-items:center;cursor:pointer;border:1px solid #9fbbb7;background:#F7F5F3;border-radius:3px;padding:10px 12px;min-height:40px;white-space:nowrap}
 .mra-menu-lines{display:flex;flex-direction:column;gap:3px}.mra-menu-lines i{display:block;background:#365e5c;width:17px;height:1.5px}

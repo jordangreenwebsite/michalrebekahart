@@ -2,15 +2,17 @@
 import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
 import { entries } from '../data/discovery.mjs';
 import { describeImage } from '../data/artwork.mjs';
+import { landingHero } from '../lib/image-paths.mjs';
 export function getStaticPaths() {
   return entries.map(entry => ({ params: { slug: entry.slug }, props: { entry } }));
 }
 const { entry } = Astro.props;
+const heroImage = landingHero(entry.slug);
 const nearby = entries.filter(x => x.slug !== entry.slug && x.type === entry.type).slice(0, 2);
 const related = entries.find(x => x.slug === entry.related);
 const relatedItems = related ? [related, ...nearby] : nearby;
 ---
-<DiscoveryLayout title={entry.title} description={entry.description} image={entry.image} place={entry.place}>
+<DiscoveryLayout title={entry.title} description={entry.description} image={entry.image} place={entry.place} priorityImage={heroImage}>
   <section class="art-wrap art-hero">
     <div>
       <p class="eyebrow">{entry.eyebrow}</p>
@@ -22,7 +24,7 @@ const relatedItems = related ? [related, ...nearby] : nearby;
       </div>
     </div>
     <figure class="hero-art">
-      <img src={entry.image} alt={describeImage(entry.image)} loading="eager" decoding="async" />
+      <img src={heroImage} alt={describeImage(entry.image)} loading="eager" decoding="async" fetchpriority="high" />
     </figure>
   </section>
   <article class="art-copy">

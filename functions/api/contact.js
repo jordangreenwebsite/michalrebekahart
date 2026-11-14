@@ -55,7 +55,7 @@ export async function onRequestPost({ request, env, context }) {
   }
   const cleanName = name.replace(/[\r\n]/g,' ');
   const plainText = ['New artwork enquiry from Michal Rebekah Art','','Name: '+cleanName,
-    'Email: '+email,'Enquiry type: '+categories[safeCategory],'','Message:',message,'','Sent from: https://www.michalrebekahart.co.uk/contact/'].join('\n');
+    'Email: '+email,'Enquiry type: '+categories[safeCategory],'','Message:',message,'','Sent from: https://www.michalrebekahart.com/contact/'].join('\n');
   let provider;
   try {
     provider = await fetch('https://api.resend.com/emails', {

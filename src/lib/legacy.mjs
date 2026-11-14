@@ -5,12 +5,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { artwork, describeImage } from '../data/artwork.mjs';
 import { renderSiteHeader } from '../data/site-nav.mjs';
+import { artworkThumb } from './image-paths.mjs';
 
-const ROOT = 'https://www.michalrebekahart.co.uk';
+const ROOT = 'https://www.michalrebekahart.com';
 const known = {
   '/': { title: 'Watercolour & Oil Artist in Cirencester | Michal Rebekah Art' },
-  '/our-story/': { title: 'Meet Michal Rebekah | Watercolour & Oil Artist in the Cotswolds' },
-  '/journal/': { title: 'Artist Journal | Paintings, Places & Stories | Michal Rebekah Art',
+  '/our-story/': { title: 'Meet Michal Rebekah | Cotswolds Watercolour Artist' },
+  '/journal/': { title: 'Artist Journal | Paintings & Studio Notes | Michal Rebekah',
     desc: 'Notes from Mikie’s studio in the Cotswolds: original artwork, paintings displayed in Cirencester and the stories behind her watercolours and children’s book illustrations.' },
   '/commissions/': { title: 'Personalised Watercolour & Oil Art Commissions | Michal Rebekah Art' },
   '/contact/': { title: 'Contact Michal Rebekah Art | Painting & Book Enquiries' },
@@ -140,6 +141,11 @@ const extraCSS = `<style>
 .rebekah-mail-form input,.rebekah-mail-form textarea{width:100%;padding:13px;border:1px solid #a7b9b8;border-radius:4px;background:#fff;font:inherit}
 .rebekah-mail-form button{border:0;padding:15px 18px;background:#7B9B9A;color:#fff;cursor:pointer;font:600 16px Inter,sans-serif}
 .rebekah-mail-form .rebekah-note{font-size:13px;line-height:1.6}
+/* Higher-contrast sage buttons retain the artist's palette without sacrificing legibility. */
+.breakdance a.button-atom--primary{background-color:#486f6d!important;border-color:#486f6d!important}
+.breakdance a.button-atom--primary,.breakdance a.button-atom--primary .button-atom__text{color:#ffffff!important}
+.breakdance a.button-atom--primary:hover{background-color:#365e5b!important;border-color:#365e5b!important}
+.breakdance .bde-text-link-18-144,.breakdance .bde-text-link-18-144:visited{color:#284a46!important}
 .sr-only-art{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>`;
 export function legacyHtml(route) {
@@ -158,6 +164,31 @@ export function legacyHtml(route) {
       ? html.replace(/<meta name="description"[^>]*>/i, tag)
       : html.replace('</head>', tag + '</head>');
   }
+  // Remove WordPress metadata and RankMath structured data that belong to the
+  // old domain. Astro provides one consistent canonical/OG/schema set instead.
+  html = html.replace(/<script\b[^>]*class="rank-math-schema"[^>]*>[\s\S]*?<\/script>/gi,'');
+  html = html.replace(/<meta\s+property="og:(?:title|description|url|site_name)"[^>]*>/gi,'');
+  html = html.replace(/<meta\s+name="twitter:(?:title|description|card)"[^>]*>/gi,'');
+  html = html.replace(/<meta\s+name="generator"[^>]*>/gi,'');
+  html = html.replace(/<link\s+rel="alternate"[^>]*oembed[^>]*>/gi,'');
+  // The new header and painting viewer no longer depend on WordPress's bulky
+  // Awesome Menu or LightGallery presentation sheets.
+  html = html.replace(/<link\s+rel="stylesheet"[^>]*href="[^"]*(?:awesome-menu\.css|lightgallery-bundle\.min\.css)[^"]*"[^>]*>/gi,'');
+  // The old export used single-quoted script src attributes. None of these
+  // scripts are needed after replacing the menu and gallery with accessible
+  // native components. Removing them avoids hidden LightGallery thumbnails,
+  // mobile horizontal overflow and unnecessary JS downloads.
+  const unusedScripts = /(?:breakdance-header-builder@1\/header-builder\.js|awesome-menu@1\/awesome-menu\.js|isotope-layout@3\.0\.6\/isotope\.pkgd\.min\.js|lightgallery@2\/lightgallery-bundle\.min\.js|elements-reusable-code\/lightbox\.js|breakdance-gallery@1\/gallery\.js)/i;
+  html = html.replace(/<script\b[^>]*\bsrc\s*=\s*(['"])(.*?)\1[^>]*>\s*<\/script>/gi,
+    (tag,_quote,src)=>unusedScripts.test(src)?'':tag);
+  html = html.replace(/<script\b[^>]*>\s*document\.addEventListener\('DOMContentLoaded',[\s\S]*?<\/script>/gi,
+    tag=>/new\s+(?:BreakdanceHeaderBuilder|AwesomeMenu|BreakdanceLightbox|BreakdanceGallery)\s*\(/.test(tag)?'':tag);
+  html = html.replace(/<script\s+type="speculationrules">[\s\S]*?<\/script>/gi,'');
+  // Preserve the site's exact font families but request only weights in use.
+  const fontLink = '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@400;500;600&amp;family=Lato:wght@400;700&amp;display=swap">';
+  html = html.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]+"\s*>/i,fontLink);
   const title = config.title;
   const description = config.desc || html.match(/<meta name="description" content="([^"]*)"/i)?.[1] || 'Original watercolour and oil artwork from the Cotswolds.';
   const headExtras = [
@@ -169,6 +200,18 @@ export function legacyHtml(route) {
   ].join('\n');
   html = html.replace('</head>', headExtras + '</head>');
   html = html.replace('</head>', '<link rel="stylesheet" href="/site-nav.css"><script defer src="/site-nav.js"></script></head>');
+  if (route === '/') {
+    // CSS background photos are discovered late. The two high-priority preload
+    // tags let the browser choose a small mobile or desktop asset immediately.
+    const heroHead = '<link rel="preload" as="image" type="image/webp" '
+      + 'href="/images/home-hero-mobile.webp" media="(max-width: 767px)" fetchpriority="high">'
+      + '<link rel="preload" as="image" type="image/webp" '
+      + 'href="/images/home-hero-desktop.webp" media="(min-width: 768px)" fetchpriority="high">'
+      + '<style>.breakdance .bde-section-27-100{background-image:url(/images/home-hero-desktop.webp)!important}'
+      + '@media(max-width:767px){.breakdance .bde-section-27-100{background-image:url(/images/home-hero-mobile.webp)!important}}</style>';
+    html = html.replace('</head>',heroHead+'</head>');
+  }
+
   html = html.replace('</head>', '<link rel="stylesheet" href="/art-experience.css"><script defer src="/art-experience.js"></script></head>');
   html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/i, renderSiteHeader(route));
   const studioSchema = {
@@ -200,9 +243,29 @@ export function legacyHtml(route) {
     const alt = checked || (/\balt\s*=/i.test(tag)
       ? tag.match(/\balt=["']([^"']*)/i)?.[1] || ''
       : imageFallback(src, route));
-    return /\balt\s*=/i.test(tag)
+    let result = /\balt\s*=/i.test(tag)
       ? tag.replace(/\balt=["'][^"']*["']/i, 'alt="' + escapeAttr(alt) + '"')
       : tag.replace(/\s*\/?\s*>$/, ' alt="' + escapeAttr(alt) + '">');
+    if (/story-Logo/i.test(src)) {
+      // The old markup told mobile browsers to fetch a 1500px+ logo for a 52px
+      // header. Use the crisp 150px asset instead, without its giant srcset.
+      result = result.replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+    }
+    if (route === '/' && src.includes('/2026/01/pexels-anete-lusina-')) {
+      result = result.replace(/\bsrc=["'][^"']*["']/i,'src="/images/artist-at-easel.webp"')
+        .replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+      if (!/\bloading=/i.test(result)) result = result.replace(/>$/, ' loading="lazy" decoding="async">');
+    } else if (route === '/' && artwork.some(item => src.split('/').pop().startsWith(item.id))) {
+      result = result.replace(/\bsrc=["'][^"']*["']/i,'src="' + artworkThumb(src) + '"')
+        .replace(/\s+srcset=["'][^"']*["']/i,'')
+        .replace(/\s+sizes=["'][^"']*["']/i,'');
+      if(!/\bdecoding=/i.test(result))result=result.replace(/>$/, ' decoding="async">');
+    } else if (!/\bloading=/i.test(result) && !/story-Logo/i.test(src) && route !== '/') {
+      result = result.replace(/>$/, ' loading="lazy" decoding="async">');
+    }
+    return result;
   });
   // Give the original gallery lightbox readable captions without changing photo order.
   if (route === '/') {
@@ -222,7 +285,7 @@ export function legacyHtml(route) {
     // give each card an understated visible label and caption.
     html = html.replace(/<a\b[^>]*class="[^"]*ee-gallery-item--image[^"]*"[^>]*>[\s\S]*?<\/a>/gi, full => {
       const src = full.match(/<img\b[^>]*\bsrc=["']([^"']+)/i)?.[1] || '';
-      const art = artwork.find(item => src.split('/').pop().startsWith(item.id));
+      const art = artwork.find(item => src.split('/').pop().includes(item.id));
       if (!art) return full;
       const anchor = full.replace(/<a\b/, '<a data-mra-lightbox data-mra-title="' + escapeAttr(art.title) + '" data-mra-description="' + escapeAttr(art.caption) + '"');
       return '<article class="mra-painting-card mra-reveal">' + anchor

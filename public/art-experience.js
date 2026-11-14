@@ -17,12 +17,15 @@
       });
     }, {rootMargin:'0px 0px 40px 0px',threshold:0.08});
     revealTargets.forEach(function(el,i) {
+      // Do not hide the above-the-fold artwork or headline while JS and fonts
+      // initialise. These are possible LCP candidates on slower phones.
+      if (el.getBoundingClientRect().top < window.innerHeight * .92) return;
       el.classList.add('mra-reveal');
       el.style.setProperty('--mra-delay',String(Math.min(i%3,2)*85)+'ms');
       observer.observe(el);
     });
-    const hero=document.querySelector('.art-hub-hero, .bde-section-27-100');
-    if(hero) hero.classList.add('mra-enter');
+    // Keep entrance effects on content scrolled into view, not the critical
+    // homepage hero. LCP should not wait for a 1-second fade animation.
   }
 
   const links=[...document.querySelectorAll('a[data-mra-lightbox]')];

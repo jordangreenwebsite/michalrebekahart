@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-const site = 'https://www.michalrebekahart.co.uk';
+const site = 'https://www.michalrebekahart.com';
 const html = readFileSync(join(process.cwd(),'index.html'),'utf8');
 const originals = [...html.matchAll(/<a\b[^>]*\bee-gallery-item--image[^>]*href="([^"]+)"/g)]
   .map(x=>x[1]).filter(x=>x.startsWith('/wp-content/uploads/'));

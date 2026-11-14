@@ -2,7 +2,7 @@ name: Validate Astro rebuild
 on:
   push:
     branches:
-      - astro-exact-rebuild-seo-2026-11-14
+      - main
   pull_request:
     branches:
       - main
@@ -26,11 +26,26 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Check desktop/mobile pages, forms and take screenshots
         run: npm run test:browser
+      - name: Diagnose mobile LCP and artwork resource loading
+        run: node tests/performance-qa.mjs
+      - name: Run mobile Lighthouse lab audit
+        continue-on-error: true
+        run: |
+          python3 -m http.server 4343 -d dist > /tmp/mra-lighthouse-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID' EXIT
+          mkdir -p qa
+          export CHROME_PATH="$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          npx --yes lighthouse@13.6.0 http://127.0.0.1:4343/ --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,seo --output=json --output-path=qa/lighthouse-mobile.json
+          node -e "const a=require('./qa/lighthouse-mobile.json'); for(const k of ['performance','accessibility','seo']) console.log(k+': '+Math.round(a.categories[k].score*100)); console.log('LCP: '+a.audits['largest-contentful-paint'].displayValue)"
       - name: Upload visual comparison screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: michal-art-qa-screenshots
-          path: qa/screenshots/
+          path: |
+            qa/screenshots/
+            qa/mobile-performance.json
+            qa/lighthouse-mobile.json
           if-no-files-found: ignore
 

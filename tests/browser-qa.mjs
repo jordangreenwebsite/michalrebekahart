@@ -19,7 +19,7 @@ const goto = async (page,path) => {
   const n=await page.locator('h1').count();
   assert.equal(n,1,'Exactly one H1 '+path);
   const canonical=await page.locator('link[rel=canonical]').getAttribute('href');
-  assert.ok(canonical?.startsWith('https://www.michalrebekahart.co.uk/'),'Canonical '+path);
+  assert.ok(canonical?.startsWith('https://www.michalrebekahart.com/'),'Canonical '+path);
 };
 try {
   await wait(1200);
@@ -64,6 +64,8 @@ try {
     assert.ok((await page.locator('.mra-lightbox-count').innerText()).startsWith('2 of '),'Next image works');
     await page.locator('.mra-lightbox-close').click();
     assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Close button dismisses lightbox');
+    await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+    await page.waitForTimeout(200);
     await page.screenshot({path:out+'/rebuilt-home-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     await goto(page,'/artwork-guide/');
     const captionCount=await page.locator('.artwork-card figcaption').count();
@@ -131,7 +133,7 @@ try {
     if(viewport.name==='desktop'){
       const original=await context.newPage();
       try {
-        const response=await original.goto('https://www.michalrebekahart.co.uk/',{waitUntil:'domcontentloaded',timeout:18000});
+        const response=await original.goto('https://www.michalrebekahart.com/',{waitUntil:'domcontentloaded',timeout:18000});
         if(response?.ok()){
           await original.screenshot({path:out+'/original-home-desktop.png',fullPage:true,animations:'disabled'});
           const referenceH1=await original.locator('h1').first().innerText();
