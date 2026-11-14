@@ -1,6 +1,6 @@
 import { entries } from '../data/discovery.mjs';
 const site = 'https://www.michalrebekahart.co.uk';
-const stable = ['', 'our-story', 'journal', 'commissions', 'contact', 'privacy-policy', 'artwork-and-commissions'];
+const stable = ['', 'our-story', 'journal', 'commissions', 'contact', 'privacy-policy', 'artwork-and-commissions', 'artwork-guide', 'art-for-businesses'];
 export const GET = () => {
   const urls = [...stable, ...entries.map(entry => entry.slug)];
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n'
