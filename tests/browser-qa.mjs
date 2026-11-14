@@ -32,6 +32,9 @@ try {
       '/artist-in-swindon/','/family-painting-commissions/'];
     for(const route of routes){
       await goto(page,route);
+      assert.equal(await page.locator('[data-mra-header]').count(),1,'Shared navigation '+route);
+      assert.ok(await page.locator('.mra-brand').isVisible(),'Brand visible '+route);
+      assert.ok(await page.locator('.mra-header-inner').boundingBox(),'Header has allocated space '+route);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
       if(overflow>6) {
         const offenders=await page.evaluate(()=>{
@@ -49,9 +52,26 @@ try {
     await goto(page,'/');
     const galleryCount=await page.locator('.ee-gallery-item--image').count();
     assert.ok(galleryCount>=30,'Original paintings still visible in homepage gallery: '+galleryCount);
+    const originalCards=await page.locator('.mra-painting-card').count();
+    assert.ok(originalCards>=32,'Original gallery paintings retained, including any cross-collection repeat');
+    assert.equal(await page.locator('.mra-art-caption h3').count(),originalCards,'Every homepage gallery item has a visible title');
+    assert.equal(await page.locator('.mra-art-caption p').count(),originalCards,'Every homepage gallery item has a visible description');
+    await page.locator('.mra-painting-card a[data-mra-lightbox]').first().click();
+    await page.locator('dialog.mra-lightbox[open]').waitFor();
+    assert.ok((await page.locator('.mra-lightbox-title').innerText()).length>3,'Lightbox title');
+    assert.ok((await page.locator('.mra-lightbox-description').innerText()).length>10,'Lightbox description');
+    await page.locator('.mra-lightbox-next').click();
+    assert.ok((await page.locator('.mra-lightbox-count').innerText()).startsWith('2 of '),'Next image works');
+    await page.locator('.mra-lightbox-close').click();
+    assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Close button dismisses lightbox');
     await page.screenshot({path:out+'/rebuilt-home-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     await goto(page,'/artwork-guide/');
     const captionCount=await page.locator('.artwork-card figcaption').count();
+    assert.equal(await page.locator('.artwork-card h3').count(),32,'Each art-guide image has a title');
+    await page.locator('.artwork-card a[data-mra-lightbox]').first().click();
+    await page.locator('dialog.mra-lightbox[open]').waitFor();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Escape closes image viewer');
     assert.equal(captionCount,32,'32 visible artwork descriptions');
     await page.screenshot({path:out+'/artwork-guide-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     if(viewport.name==='desktop'){
@@ -61,7 +81,27 @@ try {
       const artworkImages=await page.locator('.artwork-card img').count();
       assert.equal(artworkImages,32);
     }
+    await goto(page,'/');
+    if(viewport.width<=1100) {
+      await page.locator('.mra-mobile-menu>summary').click();
+      assert.ok(await page.locator('.mra-mobile-panel').isVisible(),'Mobile menu opens');
+      await page.locator('.mra-mobile-panel .mra-menu-group[data-kind="areas"]>summary').click();
+      const link=page.locator('.mra-mobile-panel a[href="/artist-in-cirencester/"]');
+      assert.ok(await link.isVisible(),'Location page accessible through mobile menu');
+      await page.keyboard.press('Escape');
+      assert.equal(await page.locator('.mra-mobile-menu[open]').count(),0,'Escape closes menu');
+    } else {
+      await page.locator('.mra-desktop-nav .mra-menu-group[data-kind="artwork"]>summary').click();
+      assert.ok(await page.locator('.mra-desktop-nav a[href="/family-painting-commissions/"]').isVisible(),'Artwork page accessible through desktop menu');
+      await page.keyboard.press('Escape');
+    }
     await goto(page,'/contact/');
+    assert.ok(await page.locator('.mra-contact-intro').isVisible(),'Editorial contact introduction visible');
+    assert.ok(await page.locator('.mra-contact-fields').isVisible(),'Enquiry fields visible');
+    assert.ok(await page.locator('.mra-contact-form-heading').isVisible(),'Form has descriptive heading');
+    const contactGrid=await page.locator('.mra-contact-form').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
+    assert.equal(contactGrid,viewport.width>950?2:1,'Responsive contact form columns');
+    await page.locator('.mra-contact-form').screenshot({path:out+'/contact-form-'+viewport.name+'.png',animations:'disabled'});
     await page.route('**/api/contact', async route=>{
       await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,message:'Thank you. Your message has been sent.'})});
     });
@@ -80,9 +120,12 @@ try {
     console.log('CONTACT FIELD STYLE DIAG',viewport.name,JSON.stringify(visibility));
     await page.locator('#art-name').fill('Test visitor',{timeout:6000});
     await page.locator('#art-email').fill('visitor@example.com');
+    await page.locator('#art-category').selectOption('personalised_painting');
     await page.locator('#art-message').fill('Could you tell me about a personalised family painting?');
     await page.locator('#rebekah-contact-form button[type=submit]').click();
     await page.locator('#art-form-status[data-sent=true]').waitFor({timeout:7000});
+    assert.ok((await page.locator('#art-form-status').innerText()).includes('Thank you'),'Clearly confirms success');
+    assert.equal(await page.locator('#art-name').inputValue(),'','Successful enquiry clears the form');
     report.push(viewport.name+' contact form client flow passed');
     // Optional external reference capture for a human visual comparison.
     if(viewport.name==='desktop'){
@@ -99,6 +142,39 @@ try {
     }
     await context.close();
   }
+  // Verify the actual menu hit-target across the intermediate screen widths
+  // where the old Breakdance hero used to overlap the menu.
+  for (const width of [600,768,1024,1120,1276]) {
+    const ctx=await browser.newContext({viewport:{width,height:820},deviceScaleFactor:1,reducedMotion:'reduce'});
+    const page=await ctx.newPage();
+    await goto(page,'/');
+    const mobile=width<=1100;
+    const toggle=mobile
+      ? page.locator('.mra-mobile-menu > summary')
+      : page.locator('.mra-desktop-nav .mra-menu-group[data-kind="artwork"] > summary');
+    assert.ok(await toggle.isVisible(),'Navigation visible at '+width+'px');
+    const rect=await toggle.boundingBox();
+    assert.ok(rect&&rect.width>15&&rect.height>15,'Navigation has usable hit area at '+width+'px');
+    const hittable=await page.evaluate(({x,y,mobile})=>{
+      const clicked=document.elementFromPoint(x,y);
+      return mobile
+        ? !!clicked?.closest('.mra-mobile-menu > summary')
+        : !!clicked?.closest('.mra-desktop-nav .mra-menu-group > summary');
+    },{x:rect.x+rect.width/2,y:rect.y+rect.height/2,mobile});
+    assert.ok(hittable,'Hero text cannot cover menu control at '+width+'px');
+    await toggle.click({timeout:5000});
+    if (mobile) {
+      assert.ok(await page.locator('.mra-mobile-panel').isVisible(),'Mobile panel opens at '+width+'px');
+      await page.locator('.mra-mobile-panel .mra-menu-group[data-kind="artwork"] > summary').click();
+      assert.ok(await page.locator('.mra-mobile-panel a[href="/artwork-guide/"]').isVisible());
+    } else {
+      assert.ok(await page.locator('.mra-desktop-nav a[href="/artwork-guide/"]').isVisible(),'Desktop artwork dropdown opens at '+width+'px');
+    }
+    await page.keyboard.press('Escape');
+    report.push('Header hit area and menu verified at '+width+'px');
+    await ctx.close();
+  }
+
   console.log(report.join('\n'));
 } finally {
   if(browser) await browser.close();

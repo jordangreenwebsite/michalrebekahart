@@ -1,0 +1,114 @@
+/* Art viewing and movement. Keep the original paper palette and typography. */
+:root{--mra-ink:#2B2B2B;--mra-paper:#F7F5F3;--mra-soft:#7B9B9A}
+.breakdance .mra-curated-gallery,
+.mra-curated-gallery{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(20px,2.5vw,36px) clamp(12px,1.9vw,24px)!important;
+  align-items:start;
+  width:100%;
+  overflow:visible!important;
+}
+.breakdance .mra-curated-gallery>.mra-painting-card,
+.mra-curated-gallery>.mra-painting-card{
+  display:block!important;position:relative;width:100%;min-width:0;
+  margin:0!important;padding:0 0 7px!important;overflow:visible;background:transparent!important;
+}
+.breakdance .mra-curated-gallery .ee-gallery-item,
+.mra-curated-gallery .ee-gallery-item{
+  display:block!important;position:relative!important;
+  width:100%!important;height:auto!important;
+  min-width:0!important;padding:0!important;overflow:hidden!important;
+  aspect-ratio:4/5!important;background:#ebe9e6!important;
+  border:0!important;border-radius:1px!important;text-decoration:none!important;
+}
+.breakdance .mra-curated-gallery .ee-gallery-item-figure,
+.mra-curated-gallery .ee-gallery-item-figure{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:100%!important;height:100%!important;position:relative!important;
+  padding:0!important;margin:0!important;aspect-ratio:auto!important;overflow:hidden!important;
+}
+.breakdance .mra-curated-gallery .ee-gallery-item-figure:before,
+.breakdance .mra-curated-gallery .ee-gallery-item-figure:after{display:none!important}
+.breakdance .mra-curated-gallery .ee-gallery-item img,
+.mra-curated-gallery .ee-gallery-item img{
+  display:block!important;width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  position:static!important;inset:auto!important;
+  object-fit:contain!important;transform:scale(1);transition:transform .8s cubic-bezier(.2,.7,.2,1)!important;
+}
+.mra-curated-gallery .mra-painting-card>a:hover img,
+.mra-curated-gallery .mra-painting-card>a:focus-visible img{transform:scale(1.025)!important}
+.mra-curated-gallery .mra-painting-card>a:focus-visible{outline:2px solid #527b79;outline-offset:4px}
+.mra-art-caption{min-height:94px;padding:15px 2px 5px!important;text-align:left!important;background:transparent!important;color:var(--mra-ink)!important}
+.mra-art-caption h3,
+.artwork-card figcaption h3{
+  margin:0 0 6px!important;font:500 clamp(17px,1.7vw,21px)/1.3 'Playfair Display',Georgia,serif!important;
+  letter-spacing:-.01em;color:var(--mra-ink)!important;
+}
+.mra-art-caption p,
+.artwork-card figcaption p{
+  font:400 13px/1.65 Inter,Arial,sans-serif!important;color:#62625d!important;
+  margin:0!important;letter-spacing:0!important;
+}
+.artwork-card{transition:box-shadow .35s ease,transform .5s ease!important;background:transparent!important;border:0!important;padding:0!important}
+.artwork-card a{outline-offset:4px}
+.artwork-card a img{object-fit:contain;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.artwork-card a:hover img{transform:scale(1.015)}
+.artwork-card figcaption{padding:18px 7px 20px!important}
+.artwork-card figcaption h3{font-size:20px!important}
+.artwork-card figcaption p{font-size:14px!important}
+/* The script enables this only where IntersectionObserver is available. */
+@media(prefers-reduced-motion:no-preference){
+  html.mra-motion .mra-reveal{
+    opacity:0;transform:translate3d(0,15px,0);
+    transition:opacity .72s ease,transform .86s cubic-bezier(.2,.65,.2,1);
+    transition-delay:var(--mra-delay,0ms);
+    will-change:opacity,transform;
+  }
+  html.mra-motion .mra-reveal.mra-visible{opacity:1;transform:none;will-change:auto}
+  html.mra-motion .mra-enter{animation:mra-arrive 1s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes mra-arrive{from{opacity:.4;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+.mra-lightbox{
+  width:min(1100px,calc(100vw - 30px));max-width:1100px;
+  height:auto;max-height:calc(100dvh - 28px);padding:0;border:1px solid #d9d5ce;
+  border-radius:2px;color:var(--mra-ink);background:var(--mra-paper);
+  box-shadow:0 30px 90px #0005;overflow:auto;
+}
+.mra-lightbox::backdrop{background:rgba(17,22,21,.83);backdrop-filter:blur(6px)}
+.mra-lightbox-inner{position:relative;padding:clamp(14px,3vw,28px) clamp(16px,3vw,34px) 22px}
+.mra-lightbox-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:16px}
+.mra-lightbox-eyebrow{font:600 10px/1.4 Inter,Arial,sans-serif;letter-spacing:.19em;text-transform:uppercase;color:#667e79}
+.mra-lightbox-close{display:inline-flex;align-items:center;gap:10px;background:transparent;cursor:pointer;border:1px solid #aab5b0;border-radius:2px;padding:9px 14px;color:var(--mra-ink);font:500 13px Inter,Arial,sans-serif}
+.mra-lightbox-close:hover,.mra-lightbox-close:focus-visible{background:#e6ebe8;outline-offset:3px}
+.mra-lightbox-close::after{content:"×";font-size:21px;line-height:10px}
+.mra-lightbox-picture{display:flex;justify-content:center;align-items:center;background:#eae9e5;min-height:220px;max-height:calc(100dvh - 275px);overflow:hidden}
+.mra-lightbox-picture img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100dvh - 275px);object-fit:contain}
+.mra-lightbox-info{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:18px;padding-top:20px}
+.mra-lightbox-info h2{font:500 clamp(24px,3.4vw,32px)/1.25 'Playfair Display',Georgia,serif!important;margin:0 0 7px;color:var(--mra-ink)}
+.mra-lightbox-info p{font:400 14px/1.65 Inter,Arial,sans-serif;color:#62625d;margin:0}
+.mra-lightbox-count{font:400 12px Inter,Arial,sans-serif;color:#78827b;white-space:nowrap}
+.mra-lightbox-nav{display:flex;gap:9px}
+.mra-lightbox-nav button{background:transparent;border:1px solid #b9c7c0;border-radius:2px;padding:10px 15px;cursor:pointer;color:#3d5550;font:500 13px Inter,Arial,sans-serif}
+.mra-lightbox-nav button:hover,.mra-lightbox-nav button:focus-visible{background:#e7ebe8}
+.mra-lightbox-nav button:disabled{opacity:.28;cursor:default}
+@media(max-width:930px){
+  .breakdance .mra-curated-gallery,.mra-curated-gallery{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:580px){
+  .breakdance .mra-curated-gallery,.mra-curated-gallery{grid-template-columns:1fr!important;gap:28px!important}
+  .mra-art-caption{min-height:auto;padding-bottom:8px!important}
+  .mra-lightbox{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}
+  .mra-lightbox-inner{padding:12px 13px 16px}
+  .mra-lightbox-toolbar{padding-bottom:12px}
+  .mra-lightbox-picture,.mra-lightbox-picture img{max-height:calc(100dvh - 310px)}
+  .mra-lightbox-info{grid-template-columns:1fr;gap:10px;padding-top:13px}
+  .mra-lightbox-info h2{font-size:23px!important}
+  .mra-lightbox-nav{justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce){
+  .mra-curated-gallery .mra-painting-card img,.artwork-card a img{transition:none!important;transform:none!important}
+}
+
+body.mra-viewing-art{overflow:hidden}
