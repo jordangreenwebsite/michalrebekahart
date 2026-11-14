@@ -1,0 +1,9 @@
+# Cache generated art previews and the unchanged source artwork at the edge.
+/images/*
+  Cache-Control: public, max-age=604800
+
+/wp-content/uploads/*
+  Cache-Control: public, max-age=2592000
+
+/*.webp
+  Cache-Control: public, max-age=604800
