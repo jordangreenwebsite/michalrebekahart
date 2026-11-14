@@ -5,7 +5,37 @@ const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
 });
 const field = (form,key,max) => String(form.get(key) || '').trim().slice(0, max + 1);
-export async function onRequestPost({ request, env }) {
+// Prunus backend is optional. The artist email is delivered first, then a
+// best-effort lead event is forwarded in the Cloudflare request context.
+// The backend endpoint and token must be supplied by the account owner.
+async function forwardLead(env, lead) {
+  if (!env.PRUNUS_LEADS_WEBHOOK_URL || !env.PRUNUS_LEADS_WEBHOOK_TOKEN) return;
+  let endpoint;
+  try {
+    endpoint = new URL(env.PRUNUS_LEADS_WEBHOOK_URL);
+    if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password) return;
+  } catch { return; }
+  try {
+    await fetch(endpoint.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + env.PRUNUS_LEADS_WEBHOOK_TOKEN
+      },
+      body: JSON.stringify({
+        event: 'artwork_enquiry.created',
+        source: 'michalrebekahart.co.uk',
+        created_at: new Date().toISOString(),
+        delivery_status: 'accepted_by_resend',
+        lead
+      }),
+      signal: AbortSignal.timeout(4000)
+    });
+  } catch {
+    // No visitor details or tokens are logged. Email was already accepted.
+  }
+}
+export async function onRequestPost({ request, env, context }) {
   const origin = request.headers.get('Origin');
   if (origin) {
     try {
@@ -55,6 +85,11 @@ export async function onRequestPost({ request, env }) {
   if (!provider.ok) {
     // Never log the submitted message, email address or provider secrets.
     return json({ok:false,message:'The message could not be delivered. Please use the email or WhatsApp link instead.'},502);
+  }
+  if (env.PRUNUS_LEADS_WEBHOOK_URL && env.PRUNUS_LEADS_WEBHOOK_TOKEN) {
+    const forwarding = forwardLead(env, {name:cleanName,email,message});
+    if (context?.waitUntil) context.waitUntil(forwarding);
+    else await forwarding; // Non-Cloudflare test harnesses only.
   }
   // Optional aggregate metric, configured as a Cloudflare Analytics Engine binding.
   // No name, email, message, IP address or other personal information is recorded.
