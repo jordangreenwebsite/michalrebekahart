@@ -1,0 +1,229 @@
+/* Michal Rebekah Art: an editorial enquiry form, not a generic agency form. */
+.breakdance .bde-form-builder-15-118 {
+  width:100%!important;
+  max-width:1100px!important;
+  margin:0 auto clamp(38px,6vw,75px)!important;
+  padding:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border:0!important;
+}
+.breakdance .bde-form-builder-15-118 .mra-contact-form {
+  display:grid!important;
+  grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)!important;
+  gap:0!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:visible!important;
+  background:#fcfbf9!important;
+  border:1px solid #dddfd9!important;
+  box-shadow:0 14px 42px rgba(46,55,49,.07)!important;
+  text-align:left!important;
+  font-family:Inter,Arial,sans-serif!important;
+  color:#2B2B2B!important;
+}
+.breakdance .mra-contact-form * {box-sizing:border-box}
+.breakdance .mra-contact-form .mra-contact-intro {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  min-width:0;
+  padding:clamp(28px,4.1vw,58px) clamp(24px,3.7vw,50px);
+  background:#e8ede9;
+  border-right:1px solid #d8e0da;
+}
+.breakdance .mra-contact-eyebrow {
+  margin:0 0 28px!important;
+  font:600 11px/1.4 Inter,Arial,sans-serif!important;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#5f817b;
+}
+.breakdance .mra-contact-form .mra-contact-intro h3 {
+  margin:0 0 24px!important;
+  max-width:390px;
+  font:500 clamp(30px,3.25vw,43px)/1.18 "Playfair Display",Georgia,serif!important;
+  letter-spacing:-.025em;
+  color:#2B2B2B!important;
+  text-align:left!important;
+}
+.breakdance .mra-contact-intro>p:not(.mra-contact-eyebrow) {
+  margin:0 0 18px!important;
+  max-width:400px;
+  font:400 15px/1.85 Inter,Arial,sans-serif!important;
+  color:#4b5550!important;
+  text-align:left!important;
+}
+.breakdance .mra-contact-other {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border-top:1px solid #c9d5cc;
+  margin-top:auto;
+  padding-top:25px;
+  color:#51655b;
+}
+.breakdance .mra-contact-other span {
+  font:600 11px/1.45 Inter,Arial,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.breakdance .mra-contact-other a {
+  color:#345e58!important;
+  text-decoration:underline;
+  text-underline-offset:4px;
+  font:400 13px/1.5 Inter,Arial,sans-serif;
+  overflow-wrap:anywhere;
+}
+.breakdance .mra-contact-fields {
+  display:grid;
+  align-content:start;
+  gap:clamp(19px,2.3vw,27px);
+  min-width:0;
+  padding:clamp(28px,4.1vw,58px) clamp(24px,4vw,55px) clamp(30px,4.5vw,58px);
+}
+.breakdance .mra-contact-form .mra-contact-form-heading {
+  margin:0 0 2px!important;
+  font:500 25px/1.35 "Playfair Display",Georgia,serif!important;
+  letter-spacing:-.01em;
+  color:#2B2B2B!important;
+}
+.breakdance .mra-contact-form .mra-contact-pair {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px 20px;
+  min-width:0;
+}
+.breakdance .mra-contact-form .art-native-field {
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  gap:9px!important;
+  margin:0!important;
+  padding:0!important;
+}
+.breakdance .mra-contact-form .art-native-label {
+  display:block;
+  font:600 12px/1.5 Inter,Arial,sans-serif!important;
+  letter-spacing:.012em;
+  color:#3c4741!important;
+  text-align:left!important;
+}
+.breakdance .mra-contact-form .art-native-label span {color:#6a9088}
+.breakdance .mra-contact-form .art-native-input {
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:49px!important;
+  max-width:100%!important;
+  background:#fff!important;
+  color:#2B2B2B!important;
+  border:1px solid #cfd7d0!important;
+  border-radius:2px!important;
+  padding:12px 14px!important;
+  margin:0!important;
+  box-shadow:none!important;
+  font:400 14px/1.5 Inter,Arial,sans-serif!important;
+  text-align:left!important;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+.breakdance .mra-contact-form .art-native-input::placeholder {color:#8b938d;opacity:1}
+.breakdance .mra-contact-form .art-native-input:hover {border-color:#8ea99e!important}
+.breakdance .mra-contact-form .art-native-input:focus {
+  border-color:#5b877e!important;
+  box-shadow:0 0 0 3px rgba(123,155,154,.14)!important;
+  outline:0!important;
+}
+.breakdance .mra-contact-form .mra-contact-select {
+  appearance:none;
+  padding-right:37px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath fill='none' stroke='%23547770' stroke-linecap='round' stroke-width='1.5' d='m2 2 5 5 5-5'/%3E%3C/svg%3E")!important;
+  background-position:right 15px center!important;
+  background-repeat:no-repeat!important;
+  cursor:pointer;
+}
+.breakdance .mra-contact-form .mra-contact-message {
+  min-height:164px!important;
+  resize:vertical!important;
+  line-height:1.75!important;
+}
+.breakdance .mra-contact-form .mra-contact-actions {
+  display:flex;flex-direction:column;align-items:flex-start;gap:15px;
+  margin-top:1px;
+}
+.breakdance .mra-contact-form .art-native-submit {
+  display:inline-flex!important;
+  align-items:center;justify-content:center;
+  min-width:195px;min-height:53px;
+  cursor:pointer;
+  border:1px solid #567e77!important;
+  background:#698d85!important;
+  color:#fff!important;
+  font:600 13px/1.45 Inter,Arial,sans-serif!important;
+  letter-spacing:.025em;
+  padding:14px 29px!important;
+  border-radius:2px!important;
+  box-shadow:none!important;
+  transition:background .22s ease, transform .22s ease, border-color .22s ease;
+}
+.breakdance .mra-contact-form .art-native-submit:hover {
+  background:#4c7068!important;border-color:#4c7068!important;transform:translateY(-1px);
+}
+.breakdance .mra-contact-form .art-native-submit:focus-visible {outline:2px solid #527b79;outline-offset:4px}
+.breakdance .mra-contact-form .art-native-submit:disabled {opacity:.72;cursor:wait;transform:none}
+.breakdance .mra-contact-form .art-native-submit.mra-sending:before {
+  content:"";width:11px;height:11px;margin-right:11px;border:2px solid #ffffff55;border-top-color:white;border-radius:50%;
+  animation:mra-form-spin .7s linear infinite;
+}
+@keyframes mra-form-spin{to{transform:rotate(360deg)}}
+.breakdance .mra-contact-form .art-form-small {
+  color:#68736c!important;
+  font:400 12px/1.65 Inter,Arial,sans-serif!important;
+  max-width:440px;
+  text-align:left!important;
+  margin:0!important;
+}
+.breakdance .mra-contact-form .art-form-small a {color:#426c65!important;text-underline-offset:3px}
+.breakdance .mra-contact-form .art-form-status {
+  min-height:0;
+  margin:0!important;
+  color:#7b4e43!important;
+  font:500 13px/1.65 Inter,Arial,sans-serif!important;
+  text-align:left!important;
+}
+.breakdance .mra-contact-form .art-form-status:empty {display:none}
+.breakdance .mra-contact-form .art-form-status[data-sent="true"] {
+  color:#2f6652!important;
+  background:#edf5ef;
+  border-left:3px solid #668d7b;
+  padding:12px 15px;
+}
+.breakdance .mra-contact-form .art-form-status a {display:inline-block;color:inherit;text-decoration:underline;text-underline-offset:3px}
+.breakdance .mra-contact-form .art-honeypot {
+  position:absolute!important;left:-9999px!important;height:1px!important;width:1px!important;overflow:hidden!important;
+}
+@media(max-width:950px) {
+  .breakdance .bde-form-builder-15-118 .mra-contact-form {grid-template-columns:1fr!important}
+  .breakdance .mra-contact-form .mra-contact-intro {border-right:0;border-bottom:1px solid #d8e0da}
+  .breakdance .mra-contact-other {margin-top:22px}
+}
+@media(max-width:570px) {
+  .breakdance .mra-contact-form .mra-contact-pair {grid-template-columns:1fr}
+  .breakdance .mra-contact-form .mra-contact-intro {padding:29px 23px 24px}
+  .breakdance .mra-contact-form .mra-contact-intro h3 {font-size:31px!important}
+  .breakdance .mra-contact-form .mra-contact-fields {padding:29px 22px 33px}
+  .breakdance .mra-contact-form .art-native-submit {width:100%;min-width:0}
+  .breakdance .mra-contact-other {gap:8px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .breakdance .mra-contact-form .art-native-submit,
+  .breakdance .mra-contact-form .art-native-input {transition:none!important}
+  .breakdance .mra-contact-form .art-native-submit:hover {transform:none}
+  .breakdance .mra-contact-form .art-native-submit.mra-sending:before {animation:none}
+}
