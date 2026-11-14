@@ -146,11 +146,6 @@ const extraCSS = `<style>
 .breakdance a.button-atom--primary,.breakdance a.button-atom--primary .button-atom__text{color:#ffffff!important}
 .breakdance a.button-atom--primary:hover{background-color:#365e5b!important;border-color:#365e5b!important}
 .breakdance .bde-text-link-18-144,.breakdance .bde-text-link-18-144:visited{color:#284a46!important}
-/* Anchor small-screen hero headings from the top rather than recentering
-   the entire text stack when Playfair/Inter web fonts finish loading. */
-@media(max-width:479px){
-.breakdance .bde-section-27-100 .section-container{justify-content:flex-start!important}
-}
 .sr-only-art{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>`;
 export function legacyHtml(route) {
