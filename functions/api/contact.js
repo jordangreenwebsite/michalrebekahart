@@ -56,6 +56,15 @@ export async function onRequestPost({ request, env }) {
     // Never log the submitted message, email address or provider secrets.
     return json({ok:false,message:'The message could not be delivered. Please use the email or WhatsApp link instead.'},502);
   }
+  // Optional aggregate metric, configured as a Cloudflare Analytics Engine binding.
+  // No name, email, message, IP address or other personal information is recorded.
+  try {
+    env.ART_ANALYTICS?.writeDataPoint({
+      indexes:['michal-rebekah-art'],
+      blobs:['contact-form','delivered'],
+      doubles:[1]
+    });
+  } catch { /* Analytics must never interfere with delivery. */ }
   return json({ok:true,message:'Thank you. Your message has been sent. I will reply by email.'},200);
 }
 export function onRequestGet() {
