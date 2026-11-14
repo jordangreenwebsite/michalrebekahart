@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/copy-legacy-assets.mjs && node scripts/optimize-images.mjs && node scripts/bundle-legacy-css.mjs && node scripts/verify-output.mjs",
+    "build": "astro build && node scripts/copy-legacy-assets.mjs && node scripts/optimize-images.mjs && node scripts/verify-output.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test functions/api/contact.test.mjs",
