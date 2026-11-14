@@ -6,11 +6,11 @@ import { join } from 'node:path';
 import { artwork, describeImage } from '../data/artwork.mjs';
 import { renderSiteHeader } from '../data/site-nav.mjs';
 
-const ROOT = 'https://www.michalrebekahart.co.uk';
+const ROOT = 'https://www.michalrebekahart.com';
 const known = {
   '/': { title: 'Watercolour & Oil Artist in Cirencester | Michal Rebekah Art' },
-  '/our-story/': { title: 'Meet Michal Rebekah | Watercolour & Oil Artist in the Cotswolds' },
-  '/journal/': { title: 'Artist Journal | Paintings, Places & Stories | Michal Rebekah Art',
+  '/our-story/': { title: 'Meet Michal Rebekah | Cotswolds Watercolour Artist' },
+  '/journal/': { title: 'Artist Journal | Paintings & Studio Notes | Michal Rebekah',
     desc: 'Notes from Mikie’s studio in the Cotswolds: original artwork, paintings displayed in Cirencester and the stories behind her watercolours and children’s book illustrations.' },
   '/commissions/': { title: 'Personalised Watercolour & Oil Art Commissions | Michal Rebekah Art' },
   '/contact/': { title: 'Contact Michal Rebekah Art | Painting & Book Enquiries' },
