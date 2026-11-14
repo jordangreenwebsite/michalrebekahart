@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.michalrebekahart.co.uk/sitemap.xml
+Sitemap: https://www.michalrebekahart.co.uk/image-sitemap.xml

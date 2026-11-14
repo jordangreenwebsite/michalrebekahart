@@ -1,0 +1,46 @@
+---
+import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
+import { areaPages, themePages, hub } from '../data/discovery.mjs';
+---
+<DiscoveryLayout title={hub.title} description={hub.description} image="/wp-content/uploads/2026/03/IMG_6425-768x1024.jpeg" kind="hub">
+  <section class="art-wrap art-hub-hero">
+    <p class="eyebrow">Michal Rebekah Art</p>
+    <h1>Original artwork & meaningful commissions</h1>
+    <p>Watercolour and oil paintings inspired by family, childhood, friendship and the little moments that deserve to stay with us. Based in Cirencester, with occasional personalised paintings and illustrated children's books.</p>
+    <div class="action-row" style="justify-content:center">
+      <a class="art-button" href="/">View original artwork</a>
+      <a class="soft-link" href="/commissions/">Ask about a commission</a>
+    </div>
+  </section>
+  <section class="art-wrap art-hub-collections">
+    <h2>Explore the paintings in more detail</h2>
+    <p>Each work in the gallery now has an image description and a short note on what it shows.</p>
+    <p><a class="soft-link" href="/artwork-guide/">Browse all paintings with descriptions</a></p>
+  </section>
+  <section class="art-wrap art-hub-collections">
+    <h2>Artwork for shared spaces</h2>
+    <p>If you are finding artwork for a café, small hotel, care home or salon, I have written a little about the different ways a painting might fit into those places.</p>
+    <p><a class="soft-link" href="/art-for-businesses/">Artwork for businesses and shared spaces</a></p>
+  </section>
+  <section class="art-wrap art-hub-collections">
+    <h2>Explore the artwork</h2>
+    <div class="related-grid">
+      {themePages.map(page => (
+        <a class="related-card" href={'/' + page.slug + '/'}>
+          <strong>{page.title.split('|')[0].trim()}</strong><span>{page.eyebrow}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="art-wrap art-hub-collections">
+    <h2>Art around the Cotswolds & nearby towns</h2>
+    <p>I work from Cirencester. These pages introduce my work to people looking for art in nearby areas; they do not represent separate studios or galleries.</p>
+    <div class="related-grid">
+      {areaPages.map(page => (
+        <a class="related-card" href={'/' + page.slug + '/'}>
+          <strong>{page.place}</strong><span>Artwork & personal enquiries</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</DiscoveryLayout>
