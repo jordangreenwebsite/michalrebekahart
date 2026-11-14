@@ -40,3 +40,11 @@ If you want an aggregate count of delivered form enquiries, add a Cloudflare Ana
 ## Connecting art enquiries to the Prunus Media backend
 
 The form now uses Resend for email delivery and can optionally mirror the accepted enquiry to Prunus with an HMAC-signed webhook. Set `PRUNUS_LEADS_WEBHOOK_URL` and `PRUNUS_LEADS_WEBHOOK_SECRET` in Cloudflare after creating the receiving endpoint in Prunus. Email continues to work when the webhook is not connected. See [PRUNUS_BACKEND_HANDOFF.md](./PRUNUS_BACKEND_HANDOFF.md) for the exact payload, signature checks and tests. This is not a claim that an endpoint has already been created or connected.
+
+## Cloudflare variable names already present (14 November 2026)
+
+The Cloudflare Pages screenshot shows `RESEND_API_KEY`, `QUOTE_FROM_EMAIL`, `QUOTE_TO_EMAIL`, and `PORTAL_INGEST_TOKEN` already configured. The contact function now supports both `QUOTE_FROM_EMAIL` / `QUOTE_TO_EMAIL` and `CONTACT_FROM_EMAIL` / `CONTACT_TO_EMAIL`. A comma, semicolon or line break in `QUOTE_TO_EMAIL` separates recipient addresses; remove any erroneous addresses before sending.
+
+No new names are needed for Resend if these variables are set in the **Production** environment and the sending domain is verified by Resend. `PORTAL_INGEST_TOKEN` is **not** automatically compatible with the signed `PRUNUS_LEADS_WEBHOOK_SECRET` integration: do not reuse or expose it without confirming the real portal API contract. Optional Prunus syncing still requires the authenticated URL and matching signing secret documented in `PRUNUS_BACKEND_HANDOFF.md`.
+
+Do not claim real email delivery or Cloudflare production publication until the live endpoint has been tested.
