@@ -94,6 +94,12 @@ try {
       await page.keyboard.press('Escape');
     }
     await goto(page,'/contact/');
+    assert.ok(await page.locator('.mra-contact-intro').isVisible(),'Editorial contact introduction visible');
+    assert.ok(await page.locator('.mra-contact-fields').isVisible(),'Enquiry fields visible');
+    assert.ok(await page.locator('.mra-contact-form-heading').isVisible(),'Form has descriptive heading');
+    const contactGrid=await page.locator('.mra-contact-form').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
+    assert.equal(contactGrid,viewport.width>950?2:1,'Responsive contact form columns');
+    await page.locator('.mra-contact-form').screenshot({path:out+'/contact-form-'+viewport.name+'.png',animations:'disabled'});
     await page.route('**/api/contact', async route=>{
       await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,message:'Thank you. Your message has been sent.'})});
     });
@@ -112,9 +118,12 @@ try {
     console.log('CONTACT FIELD STYLE DIAG',viewport.name,JSON.stringify(visibility));
     await page.locator('#art-name').fill('Test visitor',{timeout:6000});
     await page.locator('#art-email').fill('visitor@example.com');
+    await page.locator('#art-category').selectOption('personalised_painting');
     await page.locator('#art-message').fill('Could you tell me about a personalised family painting?');
     await page.locator('#rebekah-contact-form button[type=submit]').click();
     await page.locator('#art-form-status[data-sent=true]').waitFor({timeout:7000});
+    assert.ok((await page.locator('#art-form-status').innerText()).includes('Thank you'),'Clearly confirms success');
+    assert.equal(await page.locator('#art-name').inputValue(),'','Successful enquiry clears the form');
     report.push(viewport.name+' contact form client flow passed');
     // Optional external reference capture for a human visual comparison.
     if(viewport.name==='desktop'){
