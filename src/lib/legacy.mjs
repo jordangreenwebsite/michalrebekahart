@@ -83,6 +83,22 @@ export function legacyHtml(route) {
     extraCSS
   ].join('\n');
   html = html.replace('</head>', headExtras + '</head>');
+  const studioSchema = {
+    '@context':'https://schema.org', '@type':'ProfessionalService',
+    '@id':ROOT + '/#studio', name:'Michal Rebekah Art', url:ROOT + '/',
+    telephone:'+447586768679', email:'michalrebekahart@gmail.com',
+    sameAs:['https://www.instagram.com/michalrebekahart/'],
+    areaServed:['Cirencester','Cotswolds','Gloucestershire','Swindon','Cheltenham','Bath'],
+    founder:{'@type':'Person',name:'Michal Rebekah',url:ROOT + '/our-story/'},
+    description:'Original watercolour and oil artwork, with occasional personalised commissions.'
+  };
+  html = html.replace('</head>', '<script type="application/ld+json">' + JSON.stringify(studioSchema) + '</script></head>');
+  if (route === '/commissions/') {
+    html = html.replaceAll('Personliased', 'Personalised')
+      .replaceAll('personlised', 'personalised')
+      .replaceAll('Commisions', 'Commissions');
+  }
+  if (route === '/journal/') html = html.replaceAll('peice', 'piece');
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
   html = html.replace(/<img\b[^>]*>/gi, (tag) => {
     if (/\balt\s*=/i.test(tag)) return tag;
