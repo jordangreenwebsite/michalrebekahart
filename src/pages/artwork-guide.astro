@@ -1,0 +1,39 @@
+---
+import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
+import { artwork } from '../data/artwork.mjs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+const homepage = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+const sources = [...homepage.matchAll(/<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/g)].map(x=>x[1]);
+const imageFor = id => sources.find(src=>src.split('/').pop().startsWith(id));
+const groups = [...new Set(artwork.map(x=>x.category))];
+---
+<DiscoveryLayout title="Explore the Paintings | Artwork Guide | Michal Rebekah Art" description="A closer look at 32 original paintings by Michal Rebekah, with plain-English notes on what each picture shows. Explore family, couples, childhood, places and friendship.">
+  <section class="art-wrap art-hub-hero">
+    <p class="eyebrow">The paintings, up close</p>
+    <h1>Take a closer look</h1>
+    <p>These are descriptions of what you can see in the paintings, not official titles. Some are small moments from family life; others are about friendship, time outdoors or a place worth remembering.</p>
+  </section>
+  {groups.map(category => (
+    <section class="art-wrap artwork-collection" aria-label={category}>
+      <h2>{category}</h2>
+      <div class="artwork-guide-grid">
+        {artwork.filter(item=>item.category===category).map((item,i)=>(
+          <figure class="artwork-card">
+            <a href={imageFor(item.id)} target="_blank" rel="noopener" aria-label={'Open larger image: '+item.alt}>
+              <img src={imageFor(item.id)} alt={item.alt} loading="lazy" decoding="async" />
+            </a>
+            <figcaption>{item.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  ))}
+  <section class="art-wrap artwork-collection">
+    <div class="quiet-panel">
+      <h2>Want to ask about one of these paintings?</h2>
+      <p>Send me a description of the piece that caught your eye. I can tell you whether it is available, or whether there is room to discuss a personal commission.</p>
+      <a href="/contact/">Get in touch</a>
+    </div>
+  </section>
+</DiscoveryLayout>
