@@ -3,7 +3,7 @@ import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { entries } from '../src/data/discovery.mjs';
 const paths = ['','our-story','journal','contact','commissions','privacy-policy',
-  'artwork-and-commissions',...entries.map(x=>x.slug)];
+  'artwork-and-commissions','artwork-guide','art-for-businesses',...entries.map(x=>x.slug)];
 const problems = [];
 for (const slug of paths) {
   const p = join('dist', slug, 'index.html');
