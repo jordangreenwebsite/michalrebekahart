@@ -235,6 +235,12 @@ export function legacyHtml(route) {
     html = html.replace(/(<body\b[^>]*>)/i, '$1<h1 class="sr-only-art">Michal Rebekah Art</h1>');
   }
   if (route === '/contact/') {
+    // Keep the original composition, but replace the unfinished/generic
+    // WordPress-era headings with Mikie's own quiet, first-person voice.
+    html = html.replace(/(<h3 class="bde-heading-15-106 bde-heading">)[\s\S]*?(<\/h3>)/,
+      '$1Whether it is an original painting, a personal commission or simply a question, you are very welcome to write to me.$2');
+    html = html.replace(/(<h2 class="bde-heading-15-117 bde-heading">)[\s\S]*?(<\/h2>)/,
+      '$1Send me a note$2');
     html = html.replace('</head>', '<link rel="stylesheet" href="/contact-form.css"></head>');
     // The exported Breakdance form sends to WP admin-ajax.php and cannot work on static Astro.
     html = html.replace(/<form id="contact-form118"[\s\S]*?<\/form>/i, contactForm);
