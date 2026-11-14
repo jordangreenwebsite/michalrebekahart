@@ -38,6 +38,17 @@ const contactForm = `<form id="rebekah-contact-form" class="art-native-form" act
     <input class="art-native-input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" required>
   </div>
   <div class="art-native-field">
+    <label class="art-native-label" for="art-category">What are you enquiring about?</label>
+    <select class="art-native-input" id="art-category" name="category">
+      <option value="general">A general enquiry</option>
+      <option value="original_artwork">An original painting</option>
+      <option value="personalised_painting">A personalised painting</option>
+      <option value="childrens_book">Children's book illustration</option>
+      <option value="business_artwork">Artwork for a business or shared space</option>
+      <option value="other">Something else</option>
+    </select>
+  </div>
+  <div class="art-native-field">
     <label class="art-native-label" for="art-message">Tell me a little about your idea *</label>
     <textarea class="art-native-input" id="art-message" name="message" maxlength="5000" minlength="15" rows="6" required></textarea>
   </div>
@@ -153,7 +164,7 @@ export function legacyHtml(route) {
   if (route === '/privacy-policy/') {
     html = html.replace(
       /<p data-start="1069"[\s\S]*?<hr data-start="1414"[^>]*>/,
-      '<p>When you send an enquiry through this website, your name, email address and message are sent securely to the website server and delivered to us using Resend, our email delivery provider. We use this information only to respond to your enquiry and any related requests.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
+      '<p>When you submit an enquiry, the information you provide (your name, email address, enquiry type and message) is sent securely through the website and delivered to us by Resend. Where our Prunus Media lead-management integration is enabled, the same enquiry is also recorded securely in our internal business system so that we can respond and manage the enquiry. We use this information for the enquiry and any related correspondence, not unrelated marketing.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
     );
   }
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
