@@ -1,5 +1,6 @@
 ---
 import '../styles/discovery.css';
+import { navigationGroups } from '../lib/art-navigation.mjs';
 const { title, description, image, place, kind = 'article' } = Astro.props;
 const canonical = Astro.url.toString();
 const site = 'https://www.michalrebekahart.co.uk';
@@ -45,6 +46,7 @@ const jsonLd = {
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={site + (image || '/wp-content/uploads/2026/01/story-Logo.png')} />
+  <link rel="stylesheet" href="/art-navigation.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -61,6 +63,17 @@ const jsonLd = {
       <a href="/">Home</a>
       <a href="/our-story/">My story</a>
       <a href="/journal/">Journal</a>
+      <details class="art-explore-details">
+        <summary class="art-explore-summary">Explore art</summary>
+        <div class="art-explore-panel">
+          {navigationGroups.map(group => (
+            <section class="art-nav-group" aria-label={group.title}>
+              <strong class="art-nav-heading">{group.title}</strong>
+              {group.links.map(link => <a href={link.href}>{link.label}</a>)}
+            </section>
+          ))}
+        </div>
+      </details>
       <a href="/artwork-and-commissions/">Artwork & commissions</a>
       <a href="/contact/">Contact</a>
     </nav>
@@ -71,6 +84,17 @@ const jsonLd = {
         <a href="/our-story/">My story</a>
         <a href="/journal/">Journal</a>
         <a href="/artwork-and-commissions/">Artwork & commissions</a>
+        <details class="art-explore-details">
+          <summary class="art-explore-summary">Explore all artwork and areas</summary>
+          <div class="art-explore-panel">
+            {navigationGroups.map(group => (
+              <section class="art-nav-group" aria-label={group.title}>
+                <strong class="art-nav-heading">{group.title}</strong>
+                {group.links.map(link => <a href={link.href}>{link.label}</a>)}
+              </section>
+            ))}
+          </div>
+        </details>
         <a href="/commissions/">Personalised artwork</a>
         <a href="/contact/">Contact</a>
       </nav>
