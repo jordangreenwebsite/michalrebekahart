@@ -153,7 +153,7 @@ export function legacyHtml(route) {
   if (route === '/privacy-policy/') {
     html = html.replace(
       /<p data-start="1069"[\s\S]*?<hr data-start="1414"[^>]*>/,
-      '<p>When you send an enquiry through this website, your name, email address and message are sent securely to the website server and delivered to us using Resend, our email delivery provider. We use this information only to respond to your enquiry and any related requests.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
+      '<p>When you send an enquiry through this website, your name, email address and message are sent securely to the website server and delivered to us using Resend, our email delivery provider. We use this information only to respond to your enquiry and any related requests. If the website is connected to our Prunus Media lead-management backend, your name, email and message may also be recorded there for handling your enquiry.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
     );
   }
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
