@@ -4,7 +4,7 @@ import { renderSiteHeader } from '../data/site-nav.mjs';
 const { title, description, image, place, kind = 'article' } = Astro.props;
 const canonical = Astro.url.toString();
 const navigation = renderSiteHeader(Astro.url.pathname);
-const site = 'https://www.michalrebekahart.co.uk';
+const site = 'https://www.michalrebekahart.com';
 const personId = site + '/#artist';
 const studioId = site + '/#studio';
 const jsonLd = {
