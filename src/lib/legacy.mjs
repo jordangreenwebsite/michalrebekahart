@@ -28,24 +28,24 @@ const imageFallback = (src, route) => {
 function meta(name, content, property = false) {
   return '<meta ' + (property ? 'property' : 'name') + '="' + name + '" content="' + escapeAttr(content) + '">';
 }
-const contactForm = `<form id="rebekah-contact-form" class="breakdance-form breakdance-form--vertical" action="/api/contact" method="post">
-  <div class="breakdance-form-field breakdance-form-field--text">
-    <label class="breakdance-form-field__label" for="art-name">Your name *</label>
-    <input class="breakdance-form-field__input" id="art-name" name="name" autocomplete="name" maxlength="120" required>
+const contactForm = `<form id="rebekah-contact-form" class="art-native-form" action="/api/contact" method="post">
+  <div class="art-native-field">
+    <label class="art-native-label" for="art-name">Your name *</label>
+    <input class="art-native-input" id="art-name" name="name" autocomplete="name" maxlength="120" required>
   </div>
-  <div class="breakdance-form-field breakdance-form-field--email">
-    <label class="breakdance-form-field__label" for="art-email">Your email *</label>
-    <input class="breakdance-form-field__input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+  <div class="art-native-field">
+    <label class="art-native-label" for="art-email">Your email *</label>
+    <input class="art-native-input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" required>
   </div>
-  <div class="breakdance-form-field breakdance-form-field--textarea">
-    <label class="breakdance-form-field__label" for="art-message">Tell me a little about your idea *</label>
-    <textarea class="breakdance-form-field__input" id="art-message" name="message" maxlength="5000" minlength="15" rows="6" required></textarea>
+  <div class="art-native-field">
+    <label class="art-native-label" for="art-message">Tell me a little about your idea *</label>
+    <textarea class="art-native-input" id="art-message" name="message" maxlength="5000" minlength="15" rows="6" required></textarea>
   </div>
   <div class="art-honeypot" aria-hidden="true">
     <label for="art-website">Leave this field empty</label>
     <input id="art-website" name="website" tabindex="-1" autocomplete="off">
   </div>
-  <button type="submit" class="button-atom button-atom--primary breakdance-form-button breakdance-form-button__submit"><span class="button-atom__text">Send message</span></button>
+  <button type="submit" class="art-native-submit">Send message</button>
   <p class="art-form-status" id="art-form-status" role="status" aria-live="polite"></p>
   <p class="art-form-small">Your name, email and message are used to reply to your enquiry. See our <a href="/privacy-policy/">privacy policy</a>.</p>
 </form>
@@ -77,6 +77,14 @@ const contactForm = `<form id="rebekah-contact-form" class="breakdance-form brea
 const extraCSS = `<style>
 .art-discover-footer{background:#F7F5F3;text-align:center;padding:14px 16px;font:14px Inter,sans-serif}
 .art-discover-footer a{color:#436c6b;text-decoration:underline;text-underline-offset:4px}
+
+.art-native-form{display:grid;gap:20px;font:15px Inter,sans-serif}
+.art-native-field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.art-native-label{color:#2B2B2B;font-weight:500}
+.art-native-input{display:block;width:100%;border:0;border-bottom:1px solid #a3b7b4;background:transparent;padding:12px 4px 13px;color:#2B2B2B;font:inherit;border-radius:0}
+.art-native-input:focus{outline:2px solid #7B9B9A;outline-offset:3px}
+.art-native-submit{cursor:pointer;width:fit-content;border:0;background:#7B9B9A;color:white;padding:14px 30px;font:600 15px Inter,sans-serif}
+.art-native-submit:hover{background:#547976}.art-native-submit:disabled{opacity:.65;cursor:wait}
 .art-honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.art-form-status{font-weight:600;min-height:1.5em}.art-form-status[data-sent=true]{color:#2f6a55}.art-form-small{font-size:13px;line-height:1.6}.art-description-link{text-align:center;margin:8px auto 20px;font:14px Inter,sans-serif}.art-description-link a{color:#406b69;text-decoration:underline;text-underline-offset:4px}
 .rebekah-mail-form label{font-weight:600}
 .rebekah-mail-form input,.rebekah-mail-form textarea{width:100%;padding:13px;border:1px solid #a7b9b8;border-radius:4px;background:#fff;font:inherit}
