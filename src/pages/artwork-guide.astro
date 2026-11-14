@@ -12,7 +12,7 @@ const groups = [...new Set(artwork.map(x=>x.category))];
   <section class="art-wrap art-hub-hero">
     <p class="eyebrow">The paintings, up close</p>
     <h1>Take a closer look</h1>
-    <p>These are descriptions of what you can see in the paintings, not official titles. Some are small moments from family life; others are about friendship, time outdoors or a place worth remembering.</p>
+    <p>The short titles here describe what you can see. They are not official artwork titles. Some are small moments from family life; others are about friendship, time outdoors or a place worth remembering.</p>
   </section>
   {groups.map(category => (
     <section class="art-wrap artwork-collection" aria-label={category}>
@@ -20,10 +20,10 @@ const groups = [...new Set(artwork.map(x=>x.category))];
       <div class="artwork-guide-grid">
         {artwork.filter(item=>item.category===category).map((item,i)=>(
           <figure class="artwork-card">
-            <a href={imageFor(item.id)} target="_blank" rel="noopener" aria-label={'Open larger image: '+item.alt}>
+            <a href={imageFor(item.id)} class="mra-guide-open" data-mra-lightbox data-mra-title={item.title} data-mra-description={item.caption} aria-label={'View painting: '+item.title}>
               <img src={imageFor(item.id)} alt={item.alt} loading="lazy" decoding="async" />
             </a>
-            <figcaption>{item.caption}</figcaption>
+            <figcaption><h3>{item.title}</h3><p>{item.caption}</p></figcaption>
           </figure>
         ))}
       </div>
