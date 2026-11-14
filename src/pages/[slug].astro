@@ -1,6 +1,7 @@
 ---
 import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
 import { entries } from '../data/discovery.mjs';
+import { describeImage } from '../data/artwork.mjs';
 export function getStaticPaths() {
   return entries.map(entry => ({ params: { slug: entry.slug }, props: { entry } }));
 }
@@ -21,7 +22,7 @@ const relatedItems = related ? [related, ...nearby] : nearby;
       </div>
     </div>
     <figure class="hero-art">
-      <img src={entry.image} alt="Original painting from the Michal Rebekah Art portfolio" loading="eager" decoding="async" />
+      <img src={entry.image} alt={describeImage(entry.image)} loading="eager" decoding="async" />
     </figure>
   </section>
   <article class="art-copy">
