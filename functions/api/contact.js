@@ -1,3 +1,4 @@
+import { signedPrunusLead } from './prunus-leads.js';
 // Cloudflare Pages Function. Requires a verified sender domain and the env
 // variables RESEND_API_KEY, CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL.
 // No successful submission is reported until the email provider accepts the message.
@@ -5,7 +6,7 @@ const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
 });
 const field = (form,key,max) => String(form.get(key) || '').trim().slice(0, max + 1);
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, context }) {
   const origin = request.headers.get('Origin');
   if (origin) {
     try {
@@ -25,6 +26,16 @@ export async function onRequestPost({ request, env }) {
   const name = field(form,'name',120);
   const email = field(form,'email',254);
   const message = field(form,'message',5000);
+  const category = field(form,'category',40);
+  const categories = {
+    original_artwork:'Original artwork',
+    personalised_painting:'Personalised painting',
+    childrens_book:'Children’s book illustration',
+    business_artwork:'Artwork for a business',
+    other:'Something else',
+    general:'General enquiry'
+  };
+  const safeCategory = Object.hasOwn(categories,category) ? category : 'general';
   if (name.length < 2 || name.length > 120 || email.length > 254 ||
       !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) ||
       message.length < 15 || message.length > 5000) {
@@ -35,7 +46,7 @@ export async function onRequestPost({ request, env }) {
   }
   const cleanName = name.replace(/[\r\n]/g,' ');
   const plainText = ['New artwork enquiry from Michal Rebekah Art','','Name: '+cleanName,
-    'Email: '+email,'','Message:',message,'','Sent from: https://www.michalrebekahart.co.uk/contact/'].join('\n');
+    'Email: '+email,'Enquiry type: '+categories[safeCategory],'','Message:',message,'','Sent from: https://www.michalrebekahart.co.uk/contact/'].join('\n');
   let provider;
   try {
     provider = await fetch('https://api.resend.com/emails', {
@@ -56,6 +67,23 @@ export async function onRequestPost({ request, env }) {
     // Never log the submitted message, email address or provider secrets.
     return json({ok:false,message:'The message could not be delivered. Please use the email or WhatsApp link instead.'},502);
   }
+  // Once Resend accepts the message, optionally mirror the lead into the Prunus
+  // backend. A failed/unconfigured webhook must never undo a successful email.
+  let resendId;
+  try {
+    const accepted = await provider.json?.();
+    if (typeof accepted?.id === 'string') resendId = accepted.id;
+  } catch { /* The email is accepted even if its receipt cannot be decoded. */ }
+  if (env.PRUNUS_LEADS_WEBHOOK_URL || env.PRUNUS_LEADS_WEBHOOK_SECRET) {
+    const delivery = signedPrunusLead({
+      env,
+      lead:{name:cleanName,email,message,category:safeCategory},
+      resendId
+    });
+    if (typeof context?.waitUntil === 'function') context.waitUntil(delivery);
+    else await delivery;
+  }
+
   // Optional aggregate metric, configured as a Cloudflare Analytics Engine binding.
   // No name, email, message, IP address or other personal information is recorded.
   try {
