@@ -41,7 +41,16 @@ export async function onRequestPost({ request, env, context }) {
       message.length < 15 || message.length > 5000) {
     return json({ok:false,message:'Please add your name, a valid email address and a message of at least 15 characters.'},422);
   }
-  if (!env.RESEND_API_KEY || !env.CONTACT_FROM_EMAIL || !env.CONTACT_TO_EMAIL) {
+  // Both this site's QUOTE_* variables and the newer CONTACT_* names are supported.
+  // Do not require Cloudflare secret names to be changed during the deployment.
+  const from = String(env.CONTACT_FROM_EMAIL || env.QUOTE_FROM_EMAIL || '').trim();
+  const recipients = String(env.CONTACT_TO_EMAIL || env.QUOTE_TO_EMAIL || '')
+    .split(/[,;\n]+/)
+    .map(value => value.trim())
+    .filter(Boolean);
+  const validRecipients = recipients.length > 0 && recipients.length <= 20 &&
+    recipients.every(address => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(address));
+  if (!env.RESEND_API_KEY || !from || !validRecipients) {
     return json({ok:false,message:'The enquiry form is temporarily unavailable. Please use the email or WhatsApp link below.'},503);
   }
   const cleanName = name.replace(/[\r\n]/g,' ');
@@ -53,8 +62,8 @@ export async function onRequestPost({ request, env, context }) {
       method:'POST',
       headers:{ Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json' },
       body:JSON.stringify({
-        from:env.CONTACT_FROM_EMAIL,
-        to:[env.CONTACT_TO_EMAIL],
+        from,
+        to:recipients,
         reply_to:email,
         subject:'New painting enquiry from '+cleanName,
         text:plainText
