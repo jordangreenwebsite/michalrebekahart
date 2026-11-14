@@ -173,7 +173,7 @@ export function legacyHtml(route) {
   // scripts are needed after replacing the menu and gallery with accessible
   // native components. Removing them avoids hidden LightGallery thumbnails,
   // mobile horizontal overflow and unnecessary JS downloads.
-  const unusedScripts = /(?:breakdance-header-builder@1\/header-builder|awesome-menu@1\/awesome-menu|isotope-layout@3\.0\.6\/isotope|lightgallery@2\/lightgallery|elements-reusable-code\/lightbox|breakdance-gallery@1\/gallery)\.?(?:pkgd\.min)?\.js/;
+  const unusedScripts = /(?:breakdance-header-builder@1\/header-builder\.js|awesome-menu@1\/awesome-menu\.js|isotope-layout@3\.0\.6\/isotope\.pkgd\.min\.js|lightgallery@2\/lightgallery-bundle\.min\.js|elements-reusable-code\/lightbox\.js|breakdance-gallery@1\/gallery\.js)/i;
   html = html.replace(/<script\b[^>]*\bsrc\s*=\s*(['"])(.*?)\1[^>]*>\s*<\/script>/gi,
     (tag,_quote,src)=>unusedScripts.test(src)?'':tag);
   html = html.replace(/<script\b[^>]*>\s*document\.addEventListener\('DOMContentLoaded',[\s\S]*?<\/script>/gi,
