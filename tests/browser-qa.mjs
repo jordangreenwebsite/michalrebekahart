@@ -52,8 +52,10 @@ try {
     await goto(page,'/');
     const galleryCount=await page.locator('.ee-gallery-item--image').count();
     assert.ok(galleryCount>=30,'Original paintings still visible in homepage gallery: '+galleryCount);
-    assert.equal(await page.locator('.mra-painting-card').count(),32,'Original gallery paintings retained');
-    assert.equal(await page.locator('.mra-art-caption h3').count(),32,'Visible picture titles underneath paintings');
+    const originalCards=await page.locator('.mra-painting-card').count();
+    assert.ok(originalCards>=32,'Original gallery paintings retained, including any cross-collection repeat');
+    assert.equal(await page.locator('.mra-art-caption h3').count(),originalCards,'Every homepage gallery item has a visible title');
+    assert.equal(await page.locator('.mra-art-caption p').count(),originalCards,'Every homepage gallery item has a visible description');
     await page.locator('.mra-painting-card a[data-mra-lightbox]').first().click();
     await page.locator('dialog.mra-lightbox[open]').waitFor();
     assert.ok((await page.locator('.mra-lightbox-title').innerText()).length>3,'Lightbox title');
