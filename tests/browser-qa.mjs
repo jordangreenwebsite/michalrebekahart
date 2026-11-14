@@ -55,7 +55,20 @@ try {
     await page.route('**/api/contact', async route=>{
       await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,message:'Thank you. Your message has been sent.'})});
     });
-    await page.locator('#art-name').fill('Test visitor');
+    const visibility=await page.locator('#art-name').evaluate(el=>{
+      const chain=[];
+      let item=el;
+      while(item&&chain.length<9){
+        const st=getComputedStyle(item),r=item.getBoundingClientRect();
+        chain.push({tag:item.tagName,cls:item.className,id:item.id,
+          display:st.display,visibility:st.visibility,opacity:st.opacity,
+          rect:{w:r.width,h:r.height,top:r.top}});
+        item=item.parentElement;
+      }
+      return chain;
+    });
+    console.log('CONTACT FIELD STYLE DIAG',viewport.name,JSON.stringify(visibility));
+    await page.locator('#art-name').fill('Test visitor',{timeout:6000});
     await page.locator('#art-email').fill('visitor@example.com');
     await page.locator('#art-message').fill('Could you tell me about a personalised family painting?');
     await page.locator('#rebekah-contact-form button[type=submit]').click();
