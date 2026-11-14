@@ -64,6 +64,8 @@ try {
     assert.ok((await page.locator('.mra-lightbox-count').innerText()).startsWith('2 of '),'Next image works');
     await page.locator('.mra-lightbox-close').click();
     assert.equal(await page.locator('dialog.mra-lightbox[open]').count(),0,'Close button dismisses lightbox');
+    await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+    await page.waitForTimeout(200);
     await page.screenshot({path:out+'/rebuilt-home-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     await goto(page,'/artwork-guide/');
     const captionCount=await page.locator('.artwork-card figcaption').count();
