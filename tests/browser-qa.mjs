@@ -33,6 +33,15 @@ try {
     for(const route of routes){
       await goto(page,route);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+      if(overflow>6) {
+        const offenders=await page.evaluate(()=>{
+          const right=window.innerWidth;
+          return [...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>right+6)
+            .slice(0,12).map(el=>({tag:el.tagName,cls:el.className?.toString().slice(0,90),
+              right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)}));
+        });
+        console.warn('OVERFLOW DIAG',viewport.name,route,overflow,JSON.stringify(offenders));
+      }
       assert.ok(overflow<=6,'No horizontal overflow '+route+' ('+overflow+'px)');
       report.push(viewport.name+' '+route+' rendered');
     }
