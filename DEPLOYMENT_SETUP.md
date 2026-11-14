@@ -36,3 +36,33 @@ See `SEO_MEASUREMENT.md`; use real Search Console and inbox figures. Merely addi
 ## Optional privacy-friendly conversion analytics
 
 If you want an aggregate count of delivered form enquiries, add a Cloudflare Analytics Engine binding named `ART_ANALYTICS` with dataset `michal_rebekah_art_events`. The form handler writes one event after a successful provider acceptance. It writes no name, email, message, browser identifier or IP address. Without the binding the form works normally but no Cloudflare conversion event is stored. Search Console impressions and clicks still require Search Console access; this binding does not provide them.
+
+## Optional Prunus backend lead collection
+
+The contact form uses **Resend for email delivery**. After Resend accepts the message, Cloudflare can also forward the same enquiry to your Prunus backend as a best-effort lead event.
+
+Set these as Cloudflare Pages secrets (Production and Preview) only **after the Prunus backend provides a matching endpoint**:
+
+- `PRUNUS_LEADS_WEBHOOK_URL`: verified HTTPS webhook URL in your own Prunus backend.
+- `PRUNUS_LEADS_WEBHOOK_TOKEN`: backend-generated secret bearer token. The receiving endpoint must check this token before accepting anything.
+
+The outbound JSON contract is:
+```json
+{
+  "event": "artwork_enquiry.created",
+  "source": "michalrebekahart.co.uk",
+  "created_at": "ISO 8601 UTC timestamp",
+  "delivery_status": "accepted_by_resend",
+  "lead": {
+    "name": "Enquirer's submitted name",
+    "email": "Enquirer's submitted email",
+    "message": "Enquirer's submitted message"
+  }
+}
+```
+
+The site **does not know your backend endpoint yet**. This webhook sender is ready, but no backend ingestion or lead-list display is claimed to exist. It will send nothing unless both secrets are present. Make sure the Prunus backend provides a compatible authenticated receiver and prevents duplicate leads.
+
+If the backend is slow, missing or temporarily unavailable, visitors still receive accurate confirmation of the Resend submission. The Cloudflare worker schedules the webhook in `context.waitUntil` so the lead collection is not part of the visitor's critical email submission path. The backend should implement monitoring or retry/reconciliation if missing leads would be unacceptable.
+
+For privacy, a connected backend will receive the visitor's name, email and message. Verify your privacy notice and appropriate access/retention rules before enabling the integration. Do not put either secret in GitHub or browser JavaScript.
