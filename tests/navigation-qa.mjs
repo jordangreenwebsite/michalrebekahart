@@ -7,7 +7,7 @@ import { mkdir } from 'node:fs/promises';
 const server=spawn('python3',['-m','http.server','4323','-d','dist'],{stdio:'ignore'});
 const base='http://127.0.0.1:4323';
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
-const widths=[390,600,768,1024,1180,1440];
+const widths=[320,375,390,600,768,1024,1119,1440];
 const urls=['/','/our-story/','/contact/','/artwork-guide/','/artist-in-swindon/'];
 const output='qa/navigation';
 await mkdir(output,{recursive:true});
