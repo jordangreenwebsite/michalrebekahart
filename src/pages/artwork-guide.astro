@@ -1,12 +1,15 @@
 ---
 import DiscoveryLayout from '../layouts/DiscoveryLayout.astro';
 import { artwork } from '../data/artwork.mjs';
+import { artworkThumb } from '../lib/image-paths.mjs';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 const homepage = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
 const sources = [...homepage.matchAll(/<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/g)].map(x=>x[1]);
 const imageFor = id => sources.find(src=>src.split('/').pop().startsWith(id));
 const groups = [...new Set(artwork.map(x=>x.category))];
+const fullSources = [...homepage.matchAll(/<a\b[^>]*ee-gallery-item--image[^>]*href="([^"]+)"[^>]*>[\s\S]*?<img\b[^>]*src="([^"]+)"/g)];
+const fullFor = id => fullSources.find(m=>m[2].split('/').pop().startsWith(id))?.[1] || imageFor(id);
 ---
 <DiscoveryLayout title="Explore the Paintings | Artwork Guide | Michal Rebekah Art" description="A closer look at 32 original paintings by Michal Rebekah, with plain-English notes on what each picture shows. Explore family, couples, childhood, places and friendship.">
   <section class="art-wrap art-hub-hero">
@@ -20,8 +23,8 @@ const groups = [...new Set(artwork.map(x=>x.category))];
       <div class="artwork-guide-grid">
         {artwork.filter(item=>item.category===category).map((item,i)=>(
           <figure class="artwork-card">
-            <a href={imageFor(item.id)} class="mra-guide-open" data-mra-lightbox data-mra-title={item.title} data-mra-description={item.caption} aria-label={'View painting: '+item.title}>
-              <img src={imageFor(item.id)} alt={item.alt} loading="lazy" decoding="async" />
+            <a href={fullFor(item.id)} class="mra-guide-open" data-mra-lightbox data-mra-title={item.title} data-mra-description={item.caption} aria-label={'View painting: '+item.title}>
+              <img src={artworkThumb(imageFor(item.id))} alt={item.alt} loading="lazy" decoding="async" />
             </a>
             <figcaption><h3>{item.title}</h3><p>{item.caption}</p></figcaption>
           </figure>
