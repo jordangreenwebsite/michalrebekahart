@@ -32,3 +32,7 @@
 
 ## Metrics
 See `SEO_MEASUREMENT.md`; use real Search Console and inbox figures. Merely adding 20 pages is not a traffic guarantee.
+
+## Optional privacy-friendly conversion analytics
+
+If you want an aggregate count of delivered form enquiries, add a Cloudflare Analytics Engine binding named `ART_ANALYTICS` with dataset `michal_rebekah_art_events`. The form handler writes one event after a successful provider acceptance. It writes no name, email, message, browser identifier or IP address. Without the binding the form works normally but no Cloudflare conversion event is stored. Search Console impressions and clicks still require Search Console access; this binding does not provide them.
