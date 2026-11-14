@@ -6,6 +6,8 @@ import { join } from 'node:path';
 const homepage = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
 const sources = [...homepage.matchAll(/<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/g)].map(x=>x[1]);
 const imageFor = id => sources.find(src=>src.split('/').pop().startsWith(id));
+const originalLinks = [...homepage.matchAll(/<a\\b[^>]*ee-gallery-item--image[^>]*href=["']([^"']+)/g)].map(x=>x[1]);
+const enlargedFor = id => originalLinks.find(src=>src.split('/').pop().startsWith(id)) || imageFor(id);
 const groups = [...new Set(artwork.map(x=>x.category))];
 ---
 <DiscoveryLayout title="Explore the Paintings | Artwork Guide | Michal Rebekah Art" description="A closer look at 32 original paintings by Michal Rebekah, with plain-English notes on what each picture shows. Explore family, couples, childhood, places and friendship.">
@@ -20,10 +22,15 @@ const groups = [...new Set(artwork.map(x=>x.category))];
       <div class="artwork-guide-grid">
         {artwork.filter(item=>item.category===category).map((item,i)=>(
           <figure class="artwork-card">
-            <a href={imageFor(item.id)} target="_blank" rel="noopener" aria-label={'Open larger image: '+item.alt}>
+            <a href={enlargedFor(item.id)} class="artwork-open" data-artwork-open
+              data-art-category={item.category} data-art-title={item.caption}
+              data-art-description={item.alt} aria-label={'Open painting: '+item.alt}>
               <img src={imageFor(item.id)} alt={item.alt} loading="lazy" decoding="async" />
             </a>
-            <figcaption>{item.caption}</figcaption>
+            <figcaption>
+              <strong class="artwork-caption-title">{item.caption}</strong>
+              <span class="artwork-caption-detail">{item.alt}</span>
+            </figcaption>
           </figure>
         ))}
       </div>
