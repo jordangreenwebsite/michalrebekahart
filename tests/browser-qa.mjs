@@ -49,10 +49,25 @@ try {
     await goto(page,'/');
     const galleryCount=await page.locator('.ee-gallery-item--image').count();
     assert.ok(galleryCount>=30,'Original paintings still visible in homepage gallery: '+galleryCount);
+    await page.locator('.ee-gallery-item--image[data-artwork-open]').first().click();
+    const originalLightbox=page.locator('dialog.mra-lightbox[open]');
+    await originalLightbox.waitFor({timeout:7000});
+    assert.ok((await page.locator('.mra-lightbox-title').innerText()).length>10,'Artwork has a visible descriptive title');
+    assert.ok((await page.locator('.mra-lightbox-description').innerText()).length>10,'Artwork has its real-world description');
+    await page.locator('.mra-lightbox-close').click();
+    await originalLightbox.waitFor({state:'hidden'});
     await page.screenshot({path:out+'/rebuilt-home-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     await goto(page,'/artwork-guide/');
     const captionCount=await page.locator('.artwork-card figcaption').count();
     assert.equal(captionCount,32,'32 visible artwork descriptions');
+    assert.equal(await page.locator('.artwork-caption-title').count(),32,'Every painting has visible editorial title');
+    assert.equal(await page.locator('.artwork-caption-detail').count(),32,'Every painting has factual description');
+    await page.locator('.artwork-card [data-artwork-open]').first().click();
+    const guideModal=page.locator('dialog.mra-lightbox[open]');
+    await guideModal.waitFor({timeout:7000});
+    assert.ok((await page.locator('.mra-lightbox-picture').getAttribute('src')).includes('IMG_6425'));
+    await page.keyboard.press('Escape');
+    await guideModal.waitFor({state:'hidden'});
     await page.screenshot({path:out+'/artwork-guide-'+viewport.name+'.png',fullPage:true,animations:'disabled'});
     if(viewport.name==='desktop'){
       // Check larger artwork links and genuine alt descriptions.
