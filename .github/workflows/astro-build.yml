@@ -18,5 +18,7 @@ jobs:
           node-version: '22'
       - name: Install Astro dependencies
         run: npm install --no-audit --no-fund
+      - name: Test server-side contact handler
+        run: npm test
       - name: Build Astro and verify output
         run: npm run build
