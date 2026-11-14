@@ -3,6 +3,7 @@
 // are written natively; see design.md for the phase-two component extraction plan.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { artwork, describeImage } from '../data/artwork.mjs';
 
 const ROOT = 'https://www.michalrebekahart.co.uk';
 const known = {
@@ -27,30 +28,56 @@ const imageFallback = (src, route) => {
 function meta(name, content, property = false) {
   return '<meta ' + (property ? 'property' : 'name') + '="' + name + '" content="' + escapeAttr(content) + '">';
 }
-const contactForm = `<form id="rebekah-mail-form" class="rebekah-mail-form">
-  <p>Tell me a little about the painting, book or idea you have in mind.</p>
-  <label for="art-contact-name">Your name</label>
-  <input id="art-contact-name" name="name" required autocomplete="name">
-  <label for="art-contact-email">Your email</label>
-  <input id="art-contact-email" type="email" name="email" required autocomplete="email">
-  <label for="art-contact-idea">What would you like to ask?</label>
-  <textarea id="art-contact-idea" name="message" rows="5" required></textarea>
-  <button type="submit">Prepare my enquiry</button>
-  <p class="rebekah-note">This opens your email app with your message ready. Nothing is sent until you press Send there. You can also use the email or WhatsApp links below.</p>
+const contactForm = \`<form id="rebekah-contact-form" class="breakdance-form breakdance-form--vertical" action="/api/contact" method="post">
+  <div class="breakdance-form-field breakdance-form-field--text">
+    <label class="breakdance-form-field__label" for="art-name">Your name *</label>
+    <input class="breakdance-form-field__input" id="art-name" name="name" autocomplete="name" maxlength="120" required>
+  </div>
+  <div class="breakdance-form-field breakdance-form-field--email">
+    <label class="breakdance-form-field__label" for="art-email">Your email *</label>
+    <input class="breakdance-form-field__input" id="art-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+  </div>
+  <div class="breakdance-form-field breakdance-form-field--textarea">
+    <label class="breakdance-form-field__label" for="art-message">Tell me a little about your idea *</label>
+    <textarea class="breakdance-form-field__input" id="art-message" name="message" maxlength="5000" minlength="15" rows="6" required></textarea>
+  </div>
+  <div class="art-honeypot" aria-hidden="true">
+    <label for="art-website">Leave this field empty</label>
+    <input id="art-website" name="website" tabindex="-1" autocomplete="off">
+  </div>
+  <button type="submit" class="button-atom button-atom--primary breakdance-form-button breakdance-form-button__submit"><span class="button-atom__text">Send message</span></button>
+  <p class="art-form-status" id="art-form-status" role="status" aria-live="polite"></p>
+  <p class="art-form-small">Your name, email and message are used to reply to your enquiry. See our <a href="/privacy-policy/">privacy policy</a>.</p>
 </form>
 <script>
-  document.getElementById('rebekah-mail-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const d = new FormData(e.currentTarget);
-    const body = 'Name: ' + d.get('name') + '\\nEmail: ' + d.get('email') + '\\n\\n' + d.get('message');
-    location.href = 'mailto:michalrebekahart@gmail.com?subject='
-      + encodeURIComponent('Artwork enquiry from ' + d.get('name')) + '&body=' + encodeURIComponent(body);
-  });
-</script>`;
+  (function () {
+    const form=document.getElementById('rebekah-contact-form');
+    const status=document.getElementById('art-form-status');
+    if(!form||!status)return;
+    form.addEventListener('submit',async function(e) {
+      e.preventDefault();
+      const button=form.querySelector('button[type="submit"]');
+      button.disabled=true;
+      status.textContent='Sending your message...';
+      try {
+        const response=await fetch('/api/contact',{method:'POST',body:new FormData(form)});
+        const result=await response.json();
+        status.textContent=result.message||(response.ok?'Message received.':'Please try again or use the email link below.');
+        if(response.ok&&result.ok){form.reset();status.setAttribute('data-sent','true');}
+        else status.removeAttribute('data-sent');
+      } catch {
+        status.textContent='The form could not connect. Please use the email or WhatsApp link below.';
+      } finally {
+        button.disabled=false;
+      }
+    });
+  })();
+</script>\`;
+
 const extraCSS = `<style>
 .art-discover-footer{background:#F7F5F3;text-align:center;padding:14px 16px;font:14px Inter,sans-serif}
 .art-discover-footer a{color:#436c6b;text-decoration:underline;text-underline-offset:4px}
-.rebekah-mail-form{display:grid;gap:12px;font:16px Inter,sans-serif}
+.art-honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.art-form-status{font-weight:600;min-height:1.5em}.art-form-status[data-sent=true]{color:#2f6a55}.art-form-small{font-size:13px;line-height:1.6}.art-description-link{text-align:center;margin:8px auto 20px;font:14px Inter,sans-serif}.art-description-link a{color:#406b69;text-decoration:underline;text-underline-offset:4px}
 .rebekah-mail-form label{font-weight:600}
 .rebekah-mail-form input,.rebekah-mail-form textarea{width:100%;padding:13px;border:1px solid #a7b9b8;border-radius:4px;background:#fff;font:inherit}
 .rebekah-mail-form button{border:0;padding:15px 18px;background:#7B9B9A;color:#fff;cursor:pointer;font:600 16px Inter,sans-serif}
@@ -102,15 +129,33 @@ export function legacyHtml(route) {
   if (route === '/privacy-policy/') {
     html = html.replace(
       /<p data-start="1069"[\s\S]*?<hr data-start="1414"[^>]*>/,
-      '<p>The enquiry form on this static website prepares an email in your own email application. The site does not send the message or store its contents when you prepare it. If you choose to send the email, your email provider and ours will process it so we can reply.</p><p>You can also contact us through the published WhatsApp link.</p><hr>'
+      '<p>When you send an enquiry through this website, your name, email address and message are sent securely to the website server and delivered to us using Resend, our email delivery provider. We use this information only to respond to your enquiry and any related requests.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
     );
   }
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
   html = html.replace(/<img\b[^>]*>/gi, (tag) => {
-    if (/\balt\s*=/i.test(tag)) return tag;
     const src = tag.match(/\bsrc=["']([^"']+)/i)?.[1] || '';
-    return tag.replace(/\s*\/?\s*>$/, ' alt="' + escapeAttr(imageFallback(src,route)) + '">');
+    const checked = describeImage(src);
+    const alt = checked || (/\balt\s*=/i.test(tag)
+      ? tag.match(/\balt=["']([^"']*)/i)?.[1] || ''
+      : imageFallback(src, route));
+    return /\balt\s*=/i.test(tag)
+      ? tag.replace(/\balt=["'][^"']*["']/i, 'alt="' + escapeAttr(alt) + '"')
+      : tag.replace(/\s*\/?\s*>$/, ' alt="' + escapeAttr(alt) + '">');
   });
+  // Give the original gallery lightbox readable captions without changing photo order.
+  if (route === '/') {
+    html = html.replace(/<a\b[^>]*\bee-gallery-item--image[^>]*>/g, tag => {
+      const href = tag.match(/\bhref=["']([^"']+)/i)?.[1] || '';
+      const item = artwork.find(x => href.split('/').pop().startsWith(x.id));
+      if (!item) return tag;
+      return tag.replace(/data-sub-html="[^"]*"/,
+        'data-sub-html="' + escapeAttr('<p>' + item.caption + '</p>') + '"')
+        .replace(/>$/, ' aria-label="Open painting: ' + escapeAttr(item.alt) + '">');
+    });
+    html = html.replace(/(<h2\b[^>]*>\s*Family\s*<\/h2>)/i,
+      '$1<p class="art-description-link"><a href="/artwork-guide/">Browse the paintings with descriptions</a></p>');
+  }
   if (!/<h1\b/i.test(html)) {
     html = html.replace(/(<body\b[^>]*>)/i, '$1<h1 class="sr-only-art">Michal Rebekah Art</h1>');
   }
@@ -119,6 +164,6 @@ export function legacyHtml(route) {
     html = html.replace(/<form id="contact-form118"[\s\S]*?<\/form>/i, contactForm);
   }
   html = html.replace('</footer>',
-    '<div class="art-discover-footer"><a href="/artwork-and-commissions/">Explore original artwork &amp; commission ideas</a></div></footer>');
+    '<div class="art-discover-footer"><a href="/artwork-and-commissions/">Explore original artwork &amp; commission ideas</a> &nbsp; | &nbsp; <a href="/artwork-guide/">Artwork descriptions</a></div></footer>');
   return html;
 }
