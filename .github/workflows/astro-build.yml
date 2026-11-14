@@ -1,0 +1,22 @@
+name: Validate Astro rebuild
+on:
+  push:
+    branches:
+      - astro-exact-rebuild-seo-2026-11-14
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out website and original artwork
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Astro dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build Astro and verify output
+        run: npm run build
