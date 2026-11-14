@@ -64,7 +64,22 @@ const contactForm = `<form id="rebekah-contact-form" class="art-native-form" act
         const result=await response.json();
         status.textContent=result.message||(response.ok?'Message received.':'Please try again or use the email link below.');
         if(response.ok&&result.ok){form.reset();status.setAttribute('data-sent','true');}
-        else status.removeAttribute('data-sent');
+        else {
+          status.removeAttribute('data-sent');
+          if(response.status===503) {
+            const data=new FormData(form);
+            const subject='Artwork enquiry from ' + data.get('name');
+            const body='Name: ' + data.get('name') + '\\nEmail: ' + data.get('email') +
+              '\\n\\n' + data.get('message');
+            const link=document.createElement('a');
+            link.href='mailto:michalrebekahart@gmail.com?subject='
+              + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+            link.textContent='Open your email app with your message ready';
+            link.style.display='block';
+            link.style.marginTop='12px';
+            status.appendChild(link);
+          }
+        }
       } catch {
         status.textContent='The form could not connect. Please use the email or WhatsApp link below.';
       } finally {
