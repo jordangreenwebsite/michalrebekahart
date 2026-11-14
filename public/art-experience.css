@@ -1,0 +1,63 @@
+/* Art, not chrome, remains the focal point. No animations are required to see content. */
+.mra-lightbox-open { overflow:hidden; }
+.mra-lightbox {
+  padding:0;border:0;background:transparent;overflow:visible;
+  width:min(1080px,calc(100vw - 32px));max-width:none;max-height:none;
+  color:#2b2b2b;
+}
+.mra-lightbox::backdrop { background:rgba(22,27,26,.89);backdrop-filter:blur(7px); }
+.mra-lightbox-frame {
+  background:#f7f5f3;box-shadow:0 32px 100px #0005;
+  max-height:calc(100dvh - 30px);overflow:auto;
+}
+.mra-lightbox-toolbar { height:52px;display:flex;justify-content:space-between;align-items:center;
+  gap:15px;padding:0 18px 0 26px;border-bottom:1px solid #d5d7d2; }
+.mra-lightbox-category {font:600 11px/1.4 Inter,Arial,sans-serif;color:#567776;
+  text-transform:uppercase;letter-spacing:.16em;}
+.mra-lightbox-close {font:500 13px/1 Inter,Arial,sans-serif;background:transparent;color:#333;
+  border:1px solid transparent;border-radius:3px;cursor:pointer;padding:12px 14px;min-width:76px;min-height:43px;}
+.mra-lightbox-close:hover,.mra-lightbox-close:focus-visible {
+  background:#e6e9e5;border-color:#becdc7;outline:2px solid transparent;
+}
+.mra-lightbox-body {display:grid;grid-template-columns:62px minmax(0,1fr) 62px;align-items:center;}
+.mra-lightbox-figure {min-width:0;margin:0;display:flex;flex-direction:column;align-items:center;}
+.mra-lightbox-picture {display:block;object-fit:contain;width:auto;height:auto;max-width:100%;
+  max-height:min(64dvh,720px);margin:18px auto 14px;}
+.mra-lightbox-caption {background:#f7f5f3;align-self:stretch;text-align:center;
+  padding:6px 22px 26px;max-width:780px;margin-inline:auto;}
+.mra-lightbox-title {display:block;font:500 clamp(20px,2.4vw,27px)/1.35 'Playfair Display',Georgia,serif;
+  color:#2b2b2b;letter-spacing:-.025em;}
+.mra-lightbox-description {font:400 14px/1.75 Inter,Arial,sans-serif;max-width:700px;
+  color:#515957;margin:9px auto 0;}
+.mra-lightbox-arrow {background:none;border:0;color:#5b706b;font:300 42px/1 Georgia,serif;
+  height:66px;width:56px;cursor:pointer;align-self:center;justify-self:center;border-radius:50%;
+  transition:background .2s,color .2s;}
+.mra-lightbox-arrow:hover,.mra-lightbox-arrow:focus-visible {background:#e4e9e5;color:#1b3731;}
+.mra-lightbox-arrow[hidden]{display:none;}
+.artwork-card {transition:box-shadow .38s ease,transform .38s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 4px 16px rgba(45,57,51,.045);}
+.artwork-card:hover {box-shadow:0 13px 32px rgba(45,57,51,.13);transform:translateY(-3px);}
+.artwork-card a, .ee-gallery-item--image {cursor:zoom-in;}
+.artwork-card a img {transition:filter .5s ease;}
+.artwork-card a:hover img {filter:contrast(1.035);}
+.artwork-card figcaption .artwork-caption-title {display:block;
+  font:500 18px/1.45 'Playfair Display',Georgia,serif;margin-bottom:6px;}
+.artwork-card figcaption .artwork-caption-detail {display:block;
+  font:400 13px/1.65 Inter,Arial,sans-serif;color:#65706b;}
+.artwork-card figcaption {padding:17px 12px 15px!important;}
+.art-hub-hero .eyebrow {letter-spacing:.18em;}
+.artwork-card {border-color:#e4e4de!important;}
+@media(max-width:620px){
+  .mra-lightbox {width:calc(100vw - 16px);}
+  .mra-lightbox-frame{max-height:calc(100dvh - 20px);}
+  .mra-lightbox-toolbar{padding-left:15px;}
+  .mra-lightbox-body{grid-template-columns:36px minmax(0,1fr) 36px;}
+  .mra-lightbox-arrow{width:34px;height:46px;font-size:31px;}
+  .mra-lightbox-picture{max-height:min(60dvh,570px);margin:10px auto;}
+  .mra-lightbox-caption{padding:5px 7px 22px;}
+  .mra-lightbox-description{font-size:12px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .artwork-card,.artwork-card a img,.mra-lightbox-arrow{transition:none!important;}
+  .mra-lightbox::backdrop{backdrop-filter:none;}
+}
