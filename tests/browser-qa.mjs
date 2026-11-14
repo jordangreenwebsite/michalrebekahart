@@ -142,6 +142,39 @@ try {
     }
     await context.close();
   }
+  // Verify the actual menu hit-target across the intermediate screen widths
+  // where the old Breakdance hero used to overlap the menu.
+  for (const width of [600,768,1024,1120,1276]) {
+    const ctx=await browser.newContext({viewport:{width,height:820},deviceScaleFactor:1,reducedMotion:'reduce'});
+    const page=await ctx.newPage();
+    await goto(page,'/');
+    const mobile=width<=1100;
+    const toggle=mobile
+      ? page.locator('.mra-mobile-menu > summary')
+      : page.locator('.mra-desktop-nav .mra-menu-group[data-kind="artwork"] > summary');
+    assert.ok(await toggle.isVisible(),'Navigation visible at '+width+'px');
+    const rect=await toggle.boundingBox();
+    assert.ok(rect&&rect.width>15&&rect.height>15,'Navigation has usable hit area at '+width+'px');
+    const hittable=await page.evaluate(({x,y,mobile})=>{
+      const clicked=document.elementFromPoint(x,y);
+      return mobile
+        ? !!clicked?.closest('.mra-mobile-menu > summary')
+        : !!clicked?.closest('.mra-desktop-nav .mra-menu-group > summary');
+    },{x:rect.x+rect.width/2,y:rect.y+rect.height/2,mobile});
+    assert.ok(hittable,'Hero text cannot cover menu control at '+width+'px');
+    await toggle.click({timeout:5000});
+    if (mobile) {
+      assert.ok(await page.locator('.mra-mobile-panel').isVisible(),'Mobile panel opens at '+width+'px');
+      await page.locator('.mra-mobile-panel .mra-menu-group[data-kind="artwork"] > summary').click();
+      assert.ok(await page.locator('.mra-mobile-panel a[href="/artwork-guide/"]').isVisible());
+    } else {
+      assert.ok(await page.locator('.mra-desktop-nav a[href="/artwork-guide/"]').isVisible(),'Desktop artwork dropdown opens at '+width+'px');
+    }
+    await page.keyboard.press('Escape');
+    report.push('Header hit area and menu verified at '+width+'px');
+    await ctx.close();
+  }
+
   console.log(report.join('\n'));
 } finally {
   if(browser) await browser.close();
