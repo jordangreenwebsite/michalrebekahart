@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { artwork, describeImage } from '../data/artwork.mjs';
+import { legacyExploreNav } from './art-navigation.mjs';
 
 const ROOT = 'https://www.michalrebekahart.co.uk';
 const known = {
@@ -167,6 +168,11 @@ export function legacyHtml(route) {
       '<p>When you submit an enquiry, the information you provide (your name, email address, enquiry type and message) is sent securely through the website and delivered to us by Resend. Where our Prunus Media lead-management integration is enabled, the same enquiry is also recorded securely in our internal business system so that we can respond and manage the enquiry. We use this information for the enquiry and any related correspondence, not unrelated marketing.</p><p>You can also contact us by email or WhatsApp using the details on the contact page.</p><hr>'
     );
   }
+  // The old Breakdance header otherwise only links to its original six pages.
+  // Add a genuine grouped menu to every preserved route.
+  html = html.replace(/(<li class="breakdance-menu-item-19-116 breakdance-menu-item">)/i,
+    legacyExploreNav() + '$1');
+  html = html.replace('</head>', '<link rel="stylesheet" href="/art-navigation.css"></head>');
   // A valid alt attribute is required on every image, with empty alt reserved for decoration.
   html = html.replace(/<img\b[^>]*>/gi, (tag) => {
     const src = tag.match(/\bsrc=["']([^"']+)/i)?.[1] || '';
