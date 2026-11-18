@@ -1,3 +1,9 @@
+# Current Prunus portal connection — 18 November 2026
+
+The standard connection is the site's own server-side Cloudflare Production secret `PORTAL_INGEST_TOKEN` (64 lowercase hexadecimal characters), generated in the Prunus portal for this registered site. After Resend accepts the email, the Pages Function posts a flat lead payload to `https://portal.prunusmedia.com/api/ingest/lead` using bearer authentication. Resend sending and recipients are unchanged. The standard token takes precedence over the previous optional HMAC webhook so only one archive attempt occurs. If the token is absent, the legacy handoff remains available for backward compatibility. Never share a token between businesses. No personal data or secrets in GitHub. Verify actual production deployment and test both email and portal receipt before declaring connected.
+
+---
+
 # Michal Rebekah Art to Prunus Media: contact lead handoff
 
 ## What happens when someone submits the art website contact form

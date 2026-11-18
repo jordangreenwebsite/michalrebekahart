@@ -137,3 +137,28 @@ test('invalid configured recipient prevents a false form success',async()=>{
   assert.equal(response.status,503);
   assert.equal((await response.json()).ok,false);
 });
+
+test('standard site token sends flat tenant-scoped payload once after Resend',async()=>{
+  const prior=globalThis.fetch;
+  try{
+    const calls=[];
+    globalThis.fetch=async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({id:'email-123'})};};
+    const response=await onRequestPost({request:makeForm({...good,category:'business_artwork'}),env:{
+      RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'artist@example.com',
+      PORTAL_INGEST_TOKEN:'a'.repeat(64),PRUNUS_LEADS_WEBHOOK_URL:'https://example.com/legacy',PRUNUS_LEADS_WEBHOOK_SECRET:'legacy'
+    }});
+    assert.equal(response.status,200);
+    assert.equal(calls.length,2);
+    assert.equal(calls[1].url,'https://portal.prunusmedia.com/api/ingest/lead');
+    assert.equal(calls[1].options.headers.Authorization,'Bearer '+'a'.repeat(64));
+    assert.deepEqual(JSON.parse(calls[1].options.body),{external_id:'art:email-123',name:good.name,email:good.email,phone:'',postcode:'',service:'Artwork for a business',message:good.message,source_page:'/contact/'});
+  }finally{globalThis.fetch=prior;}
+});
+test('standard portal outage preserves email success',async()=>{
+  const prior=globalThis.fetch;
+  try{
+    globalThis.fetch=async(url)=>String(url).includes('api.resend.com')?{ok:true,json:async()=>({id:'email-456'})}:{ok:false,status:503};
+    const response=await onRequestPost({request:makeForm(good),env:{RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'artist@example.com',PORTAL_INGEST_TOKEN:'a'.repeat(64)}});
+    assert.equal(response.status,200);
+  }finally{globalThis.fetch=prior;}
+});
