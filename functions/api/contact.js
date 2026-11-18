@@ -6,7 +6,7 @@ const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
 });
 const field = (form,key,max) => String(form.get(key) || '').trim().slice(0, max + 1);
-export async function onRequestPost({ request, env, context }) {
+export async function onRequestPost({ request, env, context, waitUntil }) {
   const origin = request.headers.get('Origin');
   if (origin) {
     try {
@@ -83,7 +83,26 @@ export async function onRequestPost({ request, env, context }) {
     const accepted = await provider.json?.();
     if (typeof accepted?.id === 'string') resendId = accepted.id;
   } catch { /* The email is accepted even if its receipt cannot be decoded. */ }
-  if (env.PRUNUS_LEADS_WEBHOOK_URL || env.PRUNUS_LEADS_WEBHOOK_SECRET) {
+  const portalToken=String(env.PORTAL_INGEST_TOKEN||'').trim();
+  if (portalToken) {
+    const save=async()=>{
+      try {
+        if(!/^[a-f0-9]{64}$/.test(portalToken)){console.warn('Art portal token invalid');return;}
+        const rawId=String(resendId||'');
+        const id=/^[a-zA-Z0-9._:-]{1,90}$/.test(rawId)?rawId:crypto.randomUUID();
+        const response=await fetch('https://portal.prunusmedia.com/api/ingest/lead',{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+portalToken},
+          body:JSON.stringify({external_id:'art:'+id,name:cleanName,email,phone:'',postcode:'',service:categories[safeCategory],message,source_page:'/contact/'}),
+          signal:AbortSignal.timeout(8000)
+        });
+        if(!response.ok)console.warn('Art portal intake rejected',response.status);
+      }catch{console.warn('Art portal temporarily unavailable');}
+    };
+    // Cloudflare Pages supplies waitUntil directly; retain test/legacy context compatibility.
+    if(typeof waitUntil==='function')waitUntil(save());
+    else if(typeof context?.waitUntil==='function')context.waitUntil(save());
+    else await save();
+  } else if (env.PRUNUS_LEADS_WEBHOOK_URL || env.PRUNUS_LEADS_WEBHOOK_SECRET) {
     const delivery = signedPrunusLead({
       env,
       lead:{name:cleanName,email,message,category:safeCategory},
