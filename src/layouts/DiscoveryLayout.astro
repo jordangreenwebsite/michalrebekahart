@@ -1,7 +1,7 @@
 ---
 import '../styles/discovery.css';
 import { renderSiteHeader } from '../data/site-nav.mjs';
-const { title, description, image, place, kind = 'article', priorityImage } = Astro.props;
+const { title, description, image, place, kind = 'article', priorityImage, date } = Astro.props;
 const canonical = Astro.url.toString();
 const navigation = renderSiteHeader(Astro.url.pathname);
 const site = 'https://www.michalrebekahart.com';
@@ -21,6 +21,7 @@ const jsonLd = {
       description:'Original watercolour and oil paintings and occasional personalised art commissions based in Cirencester, Cotswolds.' },
     { '@type':'WebPage', '@id':canonical, url:canonical,name:title,description,
       isPartOf:{'@type':'WebSite',url:site + '/',name:'Michal Rebekah Art'} },
+    ...(kind === 'journal' ? [{ '@type':'BlogPosting',headline:title,description,datePublished:date,image:site + image,author:{'@id':personId},mainEntityOfPage:canonical }] : []),
     ...(kind === 'article' ? [
       { '@type':'Service',name:place ? 'Art commission enquiries for ' + place : 'Original artwork and personal painting enquiries',
         provider:{'@id':studioId},areaServed:place || 'Cotswolds',url:canonical }
@@ -38,7 +39,7 @@ const jsonLd = {
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href={canonical} />
   {priorityImage && <link rel="preload" as="image" href={priorityImage} type="image/webp" fetchpriority="high" />}
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content={kind === "journal" ? "article" : "website"} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
