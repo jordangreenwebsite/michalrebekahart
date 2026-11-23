@@ -18,7 +18,7 @@
 2. In Cloudflare Pages > Settings > Variables and Secrets for **Production and Preview**, set:
    - `RESEND_API_KEY`: secret API token from Resend
    - `CONTACT_FROM_EMAIL`: verified sender, for example `Michal Rebekah Art <hello@michalrebekahart.co.uk>` only after verification
-   - `CONTACT_TO_EMAIL`: `michalrebekahart@gmail.com`
+   - Enquiries are delivered only to `michalrebekahart@hotmail.com` by the contact function. Legacy `CONTACT_TO_EMAIL` / `QUOTE_TO_EMAIL` recipient settings are ignored to prevent accidentally sending messages to an old address.
 3. Redploy the preview after saving. Open `/contact/`; submit a test. Confirm inbox arrival, subject, reply-to and visible success. Confirm invalid messages produce correct errors.
 4. Enable Cloudflare rate limiting / bot protection for POST requests to `/api/contact`; a hidden honeypot, message limits and same-origin checks are already in the function.
 5. Update email privacy and data-retention arrangements to reflect actual provider and usage.
@@ -43,7 +43,7 @@ The form now uses Resend for email delivery and can optionally mirror the accept
 
 ## Cloudflare variable names already present (14 November 2026)
 
-The Cloudflare Pages screenshot shows `RESEND_API_KEY`, `QUOTE_FROM_EMAIL`, `QUOTE_TO_EMAIL`, and `PORTAL_INGEST_TOKEN` already configured. The contact function now supports both `QUOTE_FROM_EMAIL` / `QUOTE_TO_EMAIL` and `CONTACT_FROM_EMAIL` / `CONTACT_TO_EMAIL`. A comma, semicolon or line break in `QUOTE_TO_EMAIL` separates recipient addresses; remove any erroneous addresses before sending.
+The Cloudflare Pages screenshot shows `RESEND_API_KEY`, `QUOTE_FROM_EMAIL`, `QUOTE_TO_EMAIL`, and `PORTAL_INGEST_TOKEN` already configured. The contact function supports `QUOTE_FROM_EMAIL` or `CONTACT_FROM_EMAIL` for the sender, but always routes enquiries to `michalrebekahart@hotmail.com`, even if old `QUOTE_TO_EMAIL` or `CONTACT_TO_EMAIL` values remain in Cloudflare. Update or remove those old recipient variables in Cloudflare for clarity.
 
 No new names are needed for Resend if these variables are set in the **Production** environment and the sending domain is verified by Resend. `PORTAL_INGEST_TOKEN` is **not** automatically compatible with the signed `PRUNUS_LEADS_WEBHOOK_SECRET` integration: do not reuse or expose it without confirming the real portal API contract. Optional Prunus syncing still requires the authenticated URL and matching signing secret documented in `PRUNUS_BACKEND_HANDOFF.md`.
 

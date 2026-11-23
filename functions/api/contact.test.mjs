@@ -24,13 +24,13 @@ test('valid form sends to provider with safe Reply-To', async()=>{
     globalThis.fetch=async(url,options)=>{payload={url,options};return {ok:true};};
     const response=await onRequestPost({request:makeForm(good),env:{
       RESEND_API_KEY:'test-secret', CONTACT_FROM_EMAIL:'artist@example.com',
-      CONTACT_TO_EMAIL:'michalrebekahart@gmail.com'
+      CONTACT_TO_EMAIL:'michalrebekahart@hotmail.com'
     }});
     assert.equal(response.status,200);
     assert.equal((await response.json()).ok,true);
     assert.equal(payload.url,'https://api.resend.com/emails');
     const data=JSON.parse(payload.options.body);
-    assert.deepEqual(data.to,['michalrebekahart@gmail.com']);
+    assert.deepEqual(data.to,['michalrebekahart@hotmail.com']);
     assert.equal(data.reply_to,'visitor@example.com');
     assert.ok(data.text.includes('family paintings'));
   } finally {globalThis.fetch=prior;}
@@ -41,7 +41,7 @@ test('provider failure is not displayed as success',async()=>{
     globalThis.fetch=async()=>({ok:false});
     const response=await onRequestPost({request:makeForm(good),env:{
       RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',
-      CONTACT_TO_EMAIL:'michalrebekahart@gmail.com'
+      CONTACT_TO_EMAIL:'michalrebekahart@hotmail.com'
     }});
     assert.equal(response.status,502);
     assert.equal((await response.json()).ok,false);
@@ -59,7 +59,7 @@ test('optional Prunus handoff is signed, names the source and uses Resend id for
     };
     const response=await onRequestPost({request:makeForm({...good,category:'business_artwork'}),env:{
       RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',
-      CONTACT_TO_EMAIL:'michalrebekahart@gmail.com',
+      CONTACT_TO_EMAIL:'michalrebekahart@hotmail.com',
       PRUNUS_LEADS_WEBHOOK_URL:'https://backend.prunusmedia.com/integrations/leads',
       PRUNUS_LEADS_WEBHOOK_SECRET:'long-random-test-signing-secret'
     }});
@@ -88,7 +88,7 @@ test('Prunus endpoint failure cannot turn a delivered Resend email into an error
       ? {ok:true,json:async()=>({id:'email-456'})}
       : {ok:false,status:503};
     const response=await onRequestPost({request:makeForm(good),env:{
-      RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'michalrebekahart@gmail.com',
+      RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'michalrebekahart@hotmail.com',
       PRUNUS_LEADS_WEBHOOK_URL:'https://backend.prunusmedia.com/integrations/leads',
       PRUNUS_LEADS_WEBHOOK_SECRET:'test-secret'
     }});
@@ -103,7 +103,7 @@ test('Resend failure never sends data to the optional Prunus integration',async(
     const requests=[];
     globalThis.fetch=async(url)=>{requests.push(url);return {ok:false};};
     const response=await onRequestPost({request:makeForm(good),env:{
-      RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'michalrebekahart@gmail.com',
+      RESEND_API_KEY:'test',CONTACT_FROM_EMAIL:'artist@example.com',CONTACT_TO_EMAIL:'michalrebekahart@hotmail.com',
       PRUNUS_LEADS_WEBHOOK_URL:'https://backend.prunusmedia.com/integrations/leads',
       PRUNUS_LEADS_WEBHOOK_SECRET:'test-secret'
     }});
@@ -112,7 +112,7 @@ test('Resend failure never sends data to the optional Prunus integration',async(
   } finally{globalThis.fetch=prior;}
 });
 
-test('current Cloudflare QUOTE_* variable names deliver through Resend to configured recipients',async()=>{
+test('Cloudflare QUOTE_* sender works but stale recipient settings are ignored',async()=>{
   const originalFetch=globalThis.fetch;
   try {
     let sent;
@@ -120,22 +120,27 @@ test('current Cloudflare QUOTE_* variable names deliver through Resend to config
     const response=await onRequestPost({request:makeForm(good),env:{
       RESEND_API_KEY:'test-secret',
       QUOTE_FROM_EMAIL:'enquiries@contact.prunusmedia.com',
-      QUOTE_TO_EMAIL:'michalrebekahart@hotmail.com, secondary@example.com'
+      QUOTE_TO_EMAIL:'michalrebekahart@hotmail.co.uk, secondary@example.com'
     }});
     assert.equal(response.status,200);
     assert.equal(sent.url,'https://api.resend.com/emails');
     assert.equal(sent.body.from,'enquiries@contact.prunusmedia.com');
-    assert.deepEqual(sent.body.to,['michalrebekahart@hotmail.com','secondary@example.com']);
+    assert.deepEqual(sent.body.to,['michalrebekahart@hotmail.com']);
   } finally {globalThis.fetch=originalFetch;}
 });
 
-test('invalid configured recipient prevents a false form success',async()=>{
-  const response=await onRequestPost({request:makeForm(good),env:{
-    RESEND_API_KEY:'test', QUOTE_FROM_EMAIL:'enquiries@contact.prunusmedia.com',
-    QUOTE_TO_EMAIL:'not-a-valid-email'
-  }});
-  assert.equal(response.status,503);
-  assert.equal((await response.json()).ok,false);
+test('invalid recipient setting cannot divert an enquiry from the correct Hotmail inbox',async()=>{
+  const prior=globalThis.fetch;
+  try {
+    let sent;
+    globalThis.fetch=async(_url,options)=>{sent=JSON.parse(options.body);return {ok:true,json:async()=>({id:'email-abc'})};};
+    const response=await onRequestPost({request:makeForm(good),env:{
+      RESEND_API_KEY:'test', QUOTE_FROM_EMAIL:'enquiries@contact.prunusmedia.com',
+      QUOTE_TO_EMAIL:'not-a-valid-email'
+    }});
+    assert.equal(response.status,200);
+    assert.deepEqual(sent.to,['michalrebekahart@hotmail.com']);
+  } finally {globalThis.fetch=prior;}
 });
 
 test('standard site token sends flat tenant-scoped payload once after Resend',async()=>{

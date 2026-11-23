@@ -38,7 +38,7 @@ const contactForm = `<form id="rebekah-contact-form" class="art-native-form mra-
     <p>I'd love to hear what you have in mind.</p>
     <div class="mra-contact-other">
       <span>Prefer to write directly?</span>
-      <a href="mailto:michalrebekahart@gmail.com">michalrebekahart@gmail.com</a>
+      <a href="mailto:michalrebekahart@hotmail.com">michalrebekahart@hotmail.com</a>
       <a href="https://wa.me/447586768679">Or send me a WhatsApp message</a>
     </div>
   </div>
@@ -108,7 +108,7 @@ const contactForm = `<form id="rebekah-contact-form" class="art-native-form mra-
           const subject='Artwork enquiry from '+data.get('name');
           const body='Name: '+data.get('name')+'\\nEmail: '+data.get('email')+'\\n\\n'+data.get('message');
           const link=document.createElement('a');
-          link.href='mailto:michalrebekahart@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+          link.href='mailto:michalrebekahart@hotmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
           link.textContent='Open your email app with the message ready';
           status.appendChild(document.createTextNode(' '));
           status.appendChild(link);
@@ -154,6 +154,9 @@ export function legacyHtml(route) {
   if (!config) throw new Error('Unknown legacy route: ' + route);
   const file = route === '/' ? 'index.html' : join(route.slice(1), 'index.html');
   let html = readFileSync(join(process.cwd(), file), 'utf8');
+  // Rewrite old exported WordPress contact links at build time while retaining
+  // the unmodified export in Git history for visual/reference comparison.
+  html = html.replace(/michalrebekahart@(gmail\.com|hotmail\.co\.uk)/gi, 'michalrebekahart@hotmail.com');
   const canonical = ROOT + route;
   html = html.replace(/<html lang="en-US"/, '<html lang="en-GB"');
   html = html.replace(/<title>[\s\S]*?<\/title>/i, '<title>' + escapeAttr(config.title) + '</title>');
@@ -218,7 +221,7 @@ export function legacyHtml(route) {
   const studioSchema = {
     '@context':'https://schema.org', '@type':'ProfessionalService',
     '@id':ROOT + '/#studio', name:'Michal Rebekah Art', url:ROOT + '/',
-    telephone:'+447586768679', email:'michalrebekahart@gmail.com',
+    telephone:'+447586768679', email:'michalrebekahart@hotmail.com',
     sameAs:['https://www.instagram.com/michalrebekahart/'],
     areaServed:['Cirencester','Cotswolds','Gloucestershire','Swindon','Cheltenham','Bath'],
     founder:{'@type':'Person',name:'Michal Rebekah',url:ROOT + '/our-story/'},

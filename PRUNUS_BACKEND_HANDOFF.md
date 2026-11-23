@@ -9,7 +9,7 @@ The standard connection is the site's own server-side Cloudflare Production secr
 ## What happens when someone submits the art website contact form
 
 1. The visitor chooses an enquiry type and provides a name, email and message.
-2. Cloudflare Pages Function at `/api/contact` validates it and sends the email using **Resend**. Destination: `michalrebekahart@gmail.com`.
+2. Cloudflare Pages Function at `/api/contact` validates it and sends the email using **Resend**. Destination: `michalrebekahart@hotmail.com`.
 3. After Resend accepts the email, the function **optionally** sends the same enquiry to an authenticated Prunus Media backend webhook.
 4. If Prunus is not configured or unavailable, the email is still sent. The website never falsely claims the Prunus lead was recorded, and the visitor is told only whether the **email** was accepted.
 5. Only a deliberately configured endpoint is called. Nothing is sent to a guessed Prunus URL.
@@ -22,7 +22,7 @@ Configure these in both Preview and Production environments, in **Settings > Var
 | --- | --- |
 | `RESEND_API_KEY` | Secret key, provided by Resend |
 | `CONTACT_FROM_EMAIL` | Email address on a domain verified with Resend, e.g. `Michal Rebekah Art <hello@michalrebekahart.co.uk>` after verification |
-| `CONTACT_TO_EMAIL` | `michalrebekahart@gmail.com` |
+| Contact recipient | Fixed in the site's contact handler as `michalrebekahart@hotmail.com` (outdated Cloudflare `CONTACT_TO_EMAIL` and `QUOTE_TO_EMAIL` are ignored) |
 | `PRUNUS_LEADS_WEBHOOK_URL` | Optional HTTPS endpoint **you provide**, receiving leads in your Prunus backend |
 | `PRUNUS_LEADS_WEBHOOK_SECRET` | Optional high-entropy shared secret used to sign the lead payload |
 

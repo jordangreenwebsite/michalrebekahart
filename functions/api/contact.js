@@ -1,11 +1,14 @@
 import { signedPrunusLead } from './prunus-leads.js';
 // Cloudflare Pages Function. Requires a verified sender domain and the env
-// variables RESEND_API_KEY, CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL.
+// variables RESEND_API_KEY and CONTACT_FROM_EMAIL (or QUOTE_FROM_EMAIL).
+// The recipient is fixed to Mikie's verified contact address to prevent stale
+// Cloudflare recipient settings from silently misrouting artwork enquiries.
 // No successful submission is reported until the email provider accepts the message.
 const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
 });
 const field = (form,key,max) => String(form.get(key) || '').trim().slice(0, max + 1);
+const ARTIST_INBOX = 'michalrebekahart@hotmail.com';
 export async function onRequestPost({ request, env, context, waitUntil }) {
   const origin = request.headers.get('Origin');
   if (origin) {
@@ -41,16 +44,10 @@ export async function onRequestPost({ request, env, context, waitUntil }) {
       message.length < 15 || message.length > 5000) {
     return json({ok:false,message:'Please add your name, a valid email address and a message of at least 15 characters.'},422);
   }
-  // Both this site's QUOTE_* variables and the newer CONTACT_* names are supported.
-  // Do not require Cloudflare secret names to be changed during the deployment.
+  // Preserve the existing Cloudflare sender configuration, but never accept
+  // recipient overrides from stale CONTACT_TO_EMAIL / QUOTE_TO_EMAIL variables.
   const from = String(env.CONTACT_FROM_EMAIL || env.QUOTE_FROM_EMAIL || '').trim();
-  const recipients = String(env.CONTACT_TO_EMAIL || env.QUOTE_TO_EMAIL || '')
-    .split(/[,;\n]+/)
-    .map(value => value.trim())
-    .filter(Boolean);
-  const validRecipients = recipients.length > 0 && recipients.length <= 20 &&
-    recipients.every(address => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(address));
-  if (!env.RESEND_API_KEY || !from || !validRecipients) {
+  if (!env.RESEND_API_KEY || !from) {
     return json({ok:false,message:'The enquiry form is temporarily unavailable. Please use the email or WhatsApp link below.'},503);
   }
   const cleanName = name.replace(/[\r\n]/g,' ');
@@ -63,7 +60,7 @@ export async function onRequestPost({ request, env, context, waitUntil }) {
       headers:{ Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json' },
       body:JSON.stringify({
         from,
-        to:recipients,
+        to:[ARTIST_INBOX],
         reply_to:email,
         subject:'New painting enquiry from '+cleanName,
         text:plainText
