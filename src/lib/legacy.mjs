@@ -127,6 +127,7 @@ const contactForm = `<form id="rebekah-contact-form" class="art-native-form mra-
 const extraCSS = `<style>
 .art-discover-footer{background:#F7F5F3;text-align:center;padding:14px 16px;font:14px Inter,sans-serif}
 .art-discover-footer a{color:#436c6b;text-decoration:underline;text-underline-offset:4px}
+.art-portal-signin{display:block;margin-top:12px;font-size:12px}
 
 .art-native-form{display:grid;gap:20px;font:15px Inter,sans-serif}
 .art-native-field{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -309,6 +310,6 @@ export function legacyHtml(route) {
     html = html.replace(/<form id="contact-form118"[\s\S]*?<\/form>/i, contactForm);
   }
   html = html.replace('</footer>',
-    '<div class="art-discover-footer"><a href="/artwork-and-commissions/">Explore original artwork &amp; commission ideas</a> &nbsp; | &nbsp; <a href="/artwork-guide/">Artwork descriptions</a></div></footer>');
+    '<div class="art-discover-footer"><a href="/artwork-and-commissions/">Explore original artwork &amp; commission ideas</a> &nbsp; | &nbsp; <a href="/artwork-guide/">Artwork descriptions</a><a class="art-portal-signin" href="https://portal.prunusmedia.com/">Sign in</a></div></footer>');
   return html;
 }
