@@ -1,6 +1,6 @@
 import { entries } from '../data/discovery.mjs';
 const site = 'https://www.michalrebekahart.com';
-const stable = ['', 'our-story', 'journal', 'commissions', 'contact', 'privacy-policy', 'journal/choosing-between-watercolour-and-oil-paintings', 'artwork-and-commissions', 'artwork-guide', 'art-for-businesses'];
+const stable = ['', 'our-story', 'journal', 'commissions', 'contact', 'privacy-policy', 'journal/choosing-between-watercolour-and-oil-paintings', 'journal/what-to-think-about-before-commissioning-a-personal-painting', 'artwork-and-commissions', 'artwork-guide', 'art-for-businesses'];
 export const GET = () => {
   const urls = [...new Set([...stable, ...entries.map(entry => entry.slug)])];
   const body = '<?xml version="1.0" encoding="UTF-8"?>\n'
